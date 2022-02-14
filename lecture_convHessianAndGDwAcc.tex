@@ -1,0 +1,1246 @@
+% \documentclass[draft,11pt]{article}
+\chapter{Convexity and Second Derivatives,
+  Gradient Descent and Acceleration}
+\label{sec:gd}
+%\allowdisplaybreaks
+
+%%% for this lecture
+%\newcommand\gap{\text{gap}}
+
+%\begin{document}
+\sloppy
+%\lecture{3 --- Monday, March 4th}
+%{Spring 2020}{Rasmus Kyng}{Convexity and Second Derivatives,
+%  Gradient Descent and Acceleration}
+
+%%% TODO comments from students
+% 1)
+% Taylor's thm 2nd order doesn't require TWICE continuously diff,
+% according to wikipedia
+% reason: e.g. 1st order also only needs 1st deriv to exist, not to be continuous
+% ah, for a function to be differentiable, it can't have a jump
+% discontinuity in the derivative, but it can have an essential
+% discontinuity (fast oscillation)
+% https://en.wikipedia.org/wiki/Classification_of_discontinuities
+%
+%
+% 2)
+% proof of sufficient condition for local extremum is not quite right
+
+
+%In the lecture today, we didn't cover accelerated gradient
+%descent. We'll do that next week instead.
+
+\paragraph{Notation for this chapter.}
+  In this chapter, we sometimes consider a multivariate functions $f$
+  whose domain is a set $S \subseteq \R^n$, which we will require to
+  be open.
+  When we additionally require that $S$ is convex, we will specify this.
+  Note that $S = \R^n$ is both open and convex and it suffices to keep
+  this case in mind.
+  Things sometimes get more complicated if $S$ is not open, e.g. when the
+  domain of $f$ has a boundary.
+  We will leave those complications for another time.
+
+\section{A Review of Linear Algebra}
+\paragraph{Semi-definiteness of a matrix.}  The following classification of symmetric matrices will be useful.
+
+\boxdef{
+    Let $\AA$ by a symmetric matrix in $\R^{n\times n}$. We say that $\AA$ is:
+    \begin{enumerate}
+        \item \emph{positive definite} iff $\xx^\trp \AA\xx>0$ for all $x\in\R^n\setminus\{0\}$;
+        % \item \emph{negative definite} iff $\xx^\trp \AA\xx<0$ for all $x\in\R^n\setminus\{0\}$;
+        \item \emph{positive semidefinite} iff $\xx^\trp \AA\xx\geq0$ for all $x\in\R^n$;
+        % \item \emph{negative semidefinite} iff $\xx^\trp \AA\xx\leq 0$ for all $x\in\R^n$;
+        \item If neither $\AA$ nor $-\AA$ is positive semi-definite, we say that $\AA$ is \emph{indefinite}.
+    \end{enumerate}
+}
+
+\paragraph{Example: indefinite matrix.} Consider the following matrix $\AA$:
+\begin{displaymath}
+    \AA:=\begin{bmatrix}
+        +4 & -1\\
+        -1 & -2
+    \end{bmatrix}
+  \end{displaymath}
+% Then we have $\xx^\trp  \AA \xx= 4x(1)_1^2 - 2x_1 x_2 - 2x_2^2$.
+% For $\xx= (1\; 0)^\trp$, we have $\xx^\trp  \AA \xx= 4 >0$. For $\xx= (0\; 1)^\trp$ we have $\xx^\trp  \AA \xx= -2< 0$. $\AA$ is therefore indefinite.
+For $\xx=
+\begin{pmatrix}
+  1 \\ 0
+\end{pmatrix}$, we have $\xx^\trp  \AA \xx= 4 >0$. For $\xx=
+\begin{pmatrix}
+ 0 \\ 1
+\end{pmatrix}
+$ we have $\xx^\trp  \AA \xx= -2< 0$. $\AA$ is therefore indefinite.
+
+The following theorem gives a useful characterization of (semi)definite matrices.
+
+\begin{theorem}
+\label{thm:psdfromeigs}
+    Let $\AA$ be a symmetric matrix in $\R^{n\times n}$.
+    \begin{enumerate}
+        \item $\AA$ is positive definite iff all its eigenvalues are positive;
+        \item $\AA$ is positive semidefinite iff all its eigenvalues are non-negative;
+    \end{enumerate}
+\end{theorem}
+In order to prove this theorem, let us first recall the Spectral
+Theorem for symmetric matrices.
+\begin{theorem}[The Spectral Theorem for Symmetric Matrices]
+  \label{thm:spectral}
+
+
+ For all symmetric $\AA \in \R^{n \times n}$ there exist $\VV \in \R^{n
+  \times n}$ and a diagonal matrix $\LLambda \in \R^{n \times n}$
+s.t.
+\begin{enumerate}
+\item $\AA = \VV \LLambda\VV^\trp$.
+\item $\VV^\trp \VV = \II$ (the $n \times n$ identity matrix). I.e. the columns of
+  $\VV$ form an orthonormal basis.
+  Furthermore, $\vv_i$ is an eigenvector of
+  $\lambda_i(\AA)$, the $i$th eigenvalue of $\AA$.
+\item $\LLambda_{ii} = \lambda_i(\AA)$.
+\end{enumerate}
+\end{theorem}
+Using the Spectral Theorem, we can show the following result:
+\begin{theorem}[The Courant-Fischer Theorem]
+  \label{thm:courant-fischer}
+  Let $\AA$ be a symmetric matrix in $\R^{n\times n}$, with
+  eigenvalues $\lambda_1\leq \lambda_2 \leq \ldots \leq \lambda_n$.
+  Then
+  \begin{enumerate}
+  \item
+  \label{thm:courant-fischer:minmax}
+    \[
+    \lambda_i = \min_{
+      \substack{
+        \text{subspace } W \subseteq \R^n
+        \\
+        \dim{W} = i
+      }
+    }
+    \max_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+  \]
+\item
+  \label{thm:courant-fischer:maxmin}
+    \[
+    \lambda_i
+    =
+    \max_{
+      \substack{
+        \text{subspace } W \subseteq \R^n
+        \\
+        \dim{W} = n+1-i
+      }
+    }
+    \min_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+    \]
+  \end{enumerate}
+  \end{theorem}
+Theorem~\ref{thm:psdfromeigs} is an immediate corollary of
+Theorem~\ref{thm:courant-fischer}, since we can see that the minimum value
+of
+the quadratic form $\xx^\trp \AA \xx$ over $\xx \in W = \R^n$ is
+$\lambda_1(\AA)\norm{\xx}_2^2$.
+\begin{proof}[Proof of Theorem~\ref{thm:courant-fischer}]
+% The spectral theorem tells us that any real symmetric matrix is
+% diagonalizable by an orthonormal matrix (given by the eigenvectors).
+
+We start by showing Part~\ref{thm:courant-fischer:minmax}.
+
+Consider letting $W = \Span\setof{\vv_1, \ldots,
+  \vv_i}
+$, and normalize $\xx \in W$ so that $\norm{\xx}_2 = 1$. Then $\xx = \sum_{j = 1}^i
+\cc(j) \vv_j$ for some vector $\cc \in \R^i$ with $\norm{\cc}_2 = 1$.
+
+Using the decomposition from Theorem~\ref{thm:spectral} $\AA=
+\VV \LLambda\VV^\trp$ where $\LLambda$ is a diagonal matrix of
+eigenvalues of $\AA$, which we take to be sorted in increasing order.
+Then $\xx^\trp \AA\xx= \xx^\trp \VV^\trp
+\LLambda\VV\xx= (\VV\xx)^\trp  \LLambda(\VV\xx) = \sum_{j = 1}^i
+\lambda_j \cc(j)^2 \leq \lambda_i \norm{\cc}_2^2 = \lambda_i $.
+So this choice of $W$ ensures the maximizer cannot achieve a value above $\lambda_i$.
+% So ``maximizer'' can obtain a value of $\lambda_i$ given this $W$, by choosing $\cc =
+% \ee_i$, the $i$th standard basis vector.
+% At the same time, this $W$ ensures the maximizer cannot do better, as $\sum_{j = 1}^i
+% \lambda_j \cc(j)^2 \leq \lambda_i \norm{\cc}_2^2 = \lambda_i $.
+
+But is it possible that the ``minimizer'' can do better by choosing
+a different $W$?
+Let $T = \Span\setof{\vv_i, \ldots,\vv_n}$.
+As $\dim{T} = n+1-i$ and $\dim{W} = i$, we must have $\dim{W
+  \intersect T} \geq 1$, by a standard property of subspaces.
+Hence for any $W$ of this dimension,
+\begin{align*}
+    \max_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+&\geq
+    \max_{
+      \xx \in W \intersect T , \xx \neq \veczero
+    }
+\frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+\\
+&\geq  \min_{
+      \substack{
+        \text{subspace } V \subseteq T
+        \\
+        \dim{V} = 1
+      }
+    }
+    \max_{
+      \xx \in V , \xx \neq \veczero
+    }
+  \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+= \lambda_i,
+\end{align*}
+where the last equality follows from a similar calculation to our
+first one.
+Thus, $\lambda_i$ can always be achieved by the ``maximizer'' for all
+$W$ of this dimension.
+% Let us define $\yy:=\VV\xx$,
+% then we have:
+% %
+% $$\xx^\trp \AA\xx= \sum_{i=1}^n \lambda_iy_i^2$$
+% %
+% Consider letting $W = \Span\setof{\vv_1, \ldots,
+%   \vv_i}
+% $, normalize $\xx \in W$ so that $\norm{\xx}_2 = 1$ then $\xx = \sum_{j = 1}^i
+% \cc(j) \vv_j$ for a vector $\cc_i$ with $\norm{\cc_i} = 1$, and
+% where $\lambda_1,\dots,\lambda_n$ are the diagonal elements of
+% $\LLambda$, the eigenvalues of $\AA$. Also note that since $\VV$ is
+% invertible, $\yy=0$ iff $\xx=\veczero$.  If $\lambda_i> 0$ for all
+% $i$, then we see that $\xx^\trp \AA\xx>0$ for all $\xx\neq
+% \veczero$. For the other direction, choosing $\yy$ such that $y_i = 1$
+% and $y_j = 0$ for $j\neq i$ yields $\lambda_i > 0$.
+
+
+Part~\ref{thm:courant-fischer:maxmin} can be dealt with similarly.
+
+\end{proof}
+
+\paragraph{Example: a positive semidefinite matrix.} Consider the
+following matrix $\AA$:
+
+  \begin{displaymath}
+    \AA:=\begin{bmatrix}
+        1& -1\\
+        -1 & 1
+    \end{bmatrix}
+  \end{displaymath}
+For $\xx=
+\begin{pmatrix}
+  1 \\ 1
+\end{pmatrix}$,
+we have $ \AA \xx = \veczero$, so $\lambda = 0$ is an eigenvalue of
+$\AA$.
+For $\xx=
+\begin{pmatrix}
+  1 \\ -1
+\end{pmatrix}$,
+we have $ \AA \xx = \begin{pmatrix}
+  2 \\ -2
+\end{pmatrix}
+= 2 \xx
+$, so $\lambda = 2$ is the other eigenvalue of
+$\AA$.
+As both are non-negative, by the theorem above, $\AA$ is positive semidefinite.
+
+
+Since we are learning about symmetric matrices, there is one more fact
+that everyone should know about them. We'll use $\lambda_{\max}(\AA)$ denote
+maximum eigenvalue of a matrix $\AA$, and $\lambda_{\min}(\AA)$ the minimum.
+\begin{claim}
+  \label{clm:symnorm}
+  For a symmetric matrix
+  $\AA \in \R^{n\times n}$,
+  $\norm{\AA} =
+  \max(\abs{\lambda_{\max}(\AA)},
+  \abs{\lambda_{\min}(\AA)})
+$.
+\end{claim}
+
+
+
+
+\section{Characterizations of Convexity and Optimality via Second Derivatives}
+We will now use the second derivatives of a function to obtain
+characterizations of convexity and optimality. We will begin by
+introducing the \emph{Hessian}, the matrix of pairwise second
+derivatives of a function.
+We will see that it plays a role in
+approximating a function via a second-order Taylor expansion.
+We will then use \emph{semi-definiteness} of the Hessian matrix to characterize both conditions of optimality as well as the convexity of a function.
+
+\boxdef{
+Given a function $f:S \to \R$ its \textbf{Hessian} matrix at point $\xx \in S$ denoted $\HH_{f}(\xx)$ (also sometimes denoted $\grad^2 f(\xx)$) is:
+\begin{displaymath}
+    \HH_f(\xx) := \begin{bmatrix}
+        \frac{\partial^2f(\xx)}{\partial \xx(1)^2} & \frac{\partial^2f(\xx)}{\partial \xx(1)\partial \xx(2)}&\dots&\frac{\partial^2f(\xx)}{\partial \xx(1)\partial \xx(n)}\\
+        \frac{\partial^2f(\xx)}{\partial \xx(2)\partial \xx(1)} & \frac{\partial^2f(\xx)}{\partial \xx(2)^2}&\dots&\frac{\partial^2f(\xx)}{\partial \xx(2)\partial \xx(n)}\\
+        \vdots&\vdots&\ddots&\vdots\\
+        \frac{\partial^2f(\xx)}{\partial \xx(n)\partial \xx(1)}&\frac{\partial^2f(\xx)}{\partial \xx(n)\partial \xx(2)}&\dots&\frac{\partial^2f(\xx)}{\partial \xx(n)^2}
+    \end{bmatrix}
+\end{displaymath}
+}
+
+
+
+\paragraph{Second-order Taylor expansion.}  When $f$ is twice differentiable it is possible to obtain an approximation of $f$ by quadratic functions.
+%Let $S \subseteq \R^n$ be an open set.
+Our definition of $f:S\rightarrow \R$ being twice (Fr\'{e}chet) differentiable at
+$\xx \in S$ is that there exists $\grad f(\xx) \in \R^n$ and
+$\HH_f(\xx) \in R^{n \times n}$ s.t.
+\begin{displaymath}
+  \lim_{\ddelta \to \veczero}
+  \frac{\norm{f(\xx+\ddelta) -f(\xx)
+      -\left( \grad f(\xx)^{\trp} \ddelta + \frac{1}{2}\ddelta^\trp
+        \HH_f(\xx) \ddelta \right) }_2}{
+    \norm{\ddelta}_2^2
+  } = 0
+    .
+\end{displaymath}
+This is equivalent to saying that for all $\ddelta$
+\begin{displaymath}
+  %\forall \ddelta\in \R^n,
+  f(\xx+\ddelta) = f(\xx) + \grad f(\xx)^\trp \ddelta + \frac{1}{2}\ddelta^\trp  \HH_f(\xx) \ddelta + o(\norm{\ddelta}_2^2).
+\end{displaymath}
+where by definition:
+\begin{displaymath}
+  \lim_{\ddelta \rightarrow \veczero} \frac{o(\norm{\ddelta}^2)}{\norm{\ddelta}_2^2} = 0
+\end{displaymath}
+% Similarly to the first-order alternative expansion, we have, when $f$ is of class $C^1$ over $[\bar{\xx}, \xx]$ and twice differentiable over this interval:
+% \begin{displaymath}
+% \forall \xx \in \R^n,    f(\xx) = f(\bar{\xx}) + \grad f(\bar{\xx})^\trp (\xx-\bar{\xx})+ \frac{1}{2}(\xx-\bar{\xx})^\trp  H_f(\zz(\xx-\bar{\xx})
+% \quad\text{for some $\zz\in[\bar{\xx}, \xx]$.}
+% \end{displaymath}
+We say that $f$ is \emph{ continuously differentiable} on a set $S \subseteq \R^n $ if it is
+twice differentiable and in addition the gradient and Hessian are continuous on $S$.
+
+As for first order expansions, we have a Taylor's Theorem, which we
+state in the so-called remainder form.
+\begin{theorem}[Taylor's Theorem, multivariate second-order remainder
+  form]
+  \label{thm:taylorremainder2}
+  If $f:S\to \R$ is twice continuously differentiable over $[\xx, \yy]$, then for
+  some $\zz \in [\xx, \yy]$,
+\begin{displaymath}
+  f(\yy) = f(\xx) + \grad f(\xx)^\trp (\yy-\xx)
+  + \frac{1}{2}(\yy-\xx)^\trp  \HH_f(\zz) (\yy-\xx)
+\end{displaymath}
+\end{theorem}
+
+\subsection{A Necessary Condition for Local Extrema}
+
+Recall that in the previous chapter, we show the following proposition.
+\begin{proposition}
+\label{prp:gradatmin}
+    If $\xx$ is a local extremum of a differentiable function
+    $f:S\rightarrow \R$
+    then $\grad f(\xx) = \veczero$.
+\end{proposition}
+
+We can now give the second-order necessary conditions for local extrema via the Hessian.
+\begin{theorem}
+Let $f:S \rightarrow\R$ be a function twice differentiable at
+    $\xx\in S$.
+    If $\xx$ is a local minimum, then $\HH_f(\xx)$ is positive
+    semidefinite.
+    % If $\xx$ is a local maximum, then $-\HH_f(\xx)$ is positive
+    % semidefinite.
+\end{theorem}
+\begin{proof}
+  Let us assume that $\xx$ is a local minimum. We know from
+    Proposition~\ref{prp:gradatmin} that $\grad f(\xx)= \veczero$, hence the second-order expansion at $\xx$ takes the form:
+    \begin{displaymath}
+        f(\xx + \lambda\dd) = f(\xx) + \lambda^2 \frac{1}{2} \dd^\trp
+        \HH_f(\xx)\dd + o(\lambda^2 \norm{\dd}_2^2)
+    \end{displaymath}
+    Because $\xx$ is a local minimum,
+    we can then derive
+\begin{displaymath}
+  0 \leq\lim_{\lambda \to 0^+}
+  \frac{f(\xx+\lambda\dd)-f(\xx)}{\lambda^2} = \frac{1}{2}\dd^\trp \HH_f(\xx)\dd
+\end{displaymath}
+This is true for any $\dd$, hence $\HH_f(\xx)$ is positive semidefinite.
+\end{proof}
+  \begin{remark}
+    Again, for this proposition to hold, it is important that $S$ is
+    open.
+  \end{remark}
+
+\subsection{A sufficient condition for local extrema}
+A local minimum thus is a stationary point and has a positive
+semi-definite Hessian.
+The converse is almost true, but we need to strengthen the
+Hessian condition slightly.
+
+\begin{theorem}
+Let $f:S \rightarrow\R$ be a function twice differentiable at
+    a stationary point $\xx\in S$.
+     If $\HH_f(\xx)$ is positive definite then $\xx$ is a local minimum.
+\end{theorem}
+
+\begin{proof}
+    Let us assume that $\HH_f(\xx)$ is positive definite. We know that $\xx$ is a stationary point. We can write the second-order expansion at $\xx$:
+    \begin{displaymath}
+        f(\xx +\ddelta) = f(\xx) + \frac{1}{2} \ddelta^\trp
+        \HH_f(\xx) \ddelta + o( \norm{\ddelta}_2^2)
+      \end{displaymath}
+    Because the Hessian is positive definite, it has a strictly
+    positive minimum eigenvalue $\lambda_{\min}$, we can conclude that
+    $\ddelta^\trp \HH_f(\xx) \ddelta \geq \lambda_{\min} \norm{\ddelta}_2^2$.
+    From this, we conclude that when $\norm{\ddelta}_2^2$ is small
+    enough,
+    $f(\xx+\ddelta)-f(\xx) \geq \frac{1}{4} \lambda_{\min}
+    \norm{\ddelta}_2^2 > 0$.
+   This proves that $\xx$ is a local minimum.
+\end{proof}
+
+\begin{remark}
+    When $\HH_f(\xx)$ is indefinite at a stationary point $\xx$, we have what is known as a \emph{saddle point}: $\xx$ will be a minimum along the eigenvectors of $\HH_f(\xx)$ for which the eigenvalues are positive and a maximum along the eigenvectors of $\HH_f(\xx)$ for which the eigenvalues are negative.
+  \end{remark}
+
+\subsection{Characterization of convexity}
+\boxdef{
+For a convex set $S \subseteq R^n$, we say that a function $f:S \to
+\mathbb{R}$ is  \textbf{strictly convex on $S$} if for any two points $\xx_1,\xx_2 \in S$ and any $\theta \in (0,1)$ we have that:
+%
+$$ f\left (\theta \xx_1 + (1-\theta)\xx_2 \right ) < \theta f (\xx_1) + \Big (1-\theta\Big )f(\xx_2).$$
+%
+}
+
+\begin{theorem}
+Let $S \subseteq \R^n$ be open and convex, and let $f:S \to \R$ be twice continuously differentiable.
+\begin{enumerate}
+\item If $H_{f}(\xx)$ is positive semi-definite for any $\xx \in S$ then $f$ is convex on $S$.
+\item If $H_{f}(\xx)$ is positive definite for any $\xx \in S$ then $f$ is \textbf{strictly} convex on $S$.
+\item If $f$ is convex, then $H_{f}(\xx)$ is positive semi-definite $\forall \xx \in S$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\hspace{0.1in}\newline
+\begin{enumerate}
+\item By applying Theorem~\ref{thm:taylorremainder2}, we find that for some $\zz \in [\xx,\yy]$:
+%
+$$f(\yy) = f(\xx) + \grad f(\xx)^\trp (\yy - \xx) + \frac{1}{2} \Big ( (\yy - \xx)^\trp H_{f}(\zz) (\yy - \xx)   \Big )$$
+%
+If $H_{f}(\zz)$ is positive semi-definite, this necessarily implies that:
+%
+$$f(\yy) \geq f(\xx) + \grad f(\xx)^\trp (\yy - \xx)$$
+%
+and from Theorem~\ref{thm:convexlb} we get that $f$ is convex.
+%
+\item if $H_{f}(\xx)$ is positive definite, we have that:
+%
+$$f(\yy) > f(\xx) + \grad f(\xx)^\trp (\yy - \xx).$$
+%
+Applying the same idea as in Theorem~\ref{thm:convexlb} we can show that in this case $f$ is \textbf{strictly} convex.
+
+\item Let $f$ be a convex function.  For $\xx \in S$, and some small $\lambda >0$, for any $\mathbf{d} \in \mathbb{R}^n$ we have that $\xx + \lambda \mathbf{d} \in S$.  From the Taylor expansion of $f$ we get:
+%
+$$
+f(\xx+\lambda \mathbf{d}) = f(\xx) + \lambda \grad f(\xx)^\trp\mathbf{d}
++ \frac{\lambda^2}{2} \mathbf{d}^\trp H_{f}(\xx)  \mathbf{d} +
+o(\lambda^2 \norm{\dd}_2^2)
+.
+$$
+%
+From Lemma~\ref{thm:convexlb} we get that if $f$ is convex then:
+%
+$$f(\xx+\lambda\mathbf{d}) \geq f(\xx) + \lambda \grad f(\xx)^\trp \mathbf{d}.$$
+%
+Therefore, we have that for any $\mathbf{d} \in \mathbb{R}^{n}$:
+
+$$\frac{\lambda^2}{2} \mathbf{d}^\trp H_{f}(\xx)  \mathbf{d} + o(|| \lambda \mathbf{d}||^2) \geq 0$$
+
+Dividing by $\lambda^2$ and taking $\lambda \to 0^+$ gives us that for any $\mathbf{d} \in \mathbb{R}^n$: $\mathbf{d}^\trp H_{f}(\xx)  \mathbf{d} \geq 0$.\qedhere
+\end{enumerate}
+\end{proof}
+
+\begin{remark}
+It is important to note that if $S$ is open and $f$ is strictly
+convex, then $\HH_{f}(\xx)$ may still (only) be positive semi-definite
+$\forall \xx \in S$. Consider $f(x) = x^4$ which is strictly convex,
+then the Hessian is $\HH_{f}(x) = 12x^2$ which equals 0 at $x = 0$.
+\end{remark}
+
+\section{Gradient Descent - An Approach to Optimization?}
+
+We have begun to develop an understanding of convex functions, and
+what we have learned already suggests a way for us to try to find an
+approximate minimizer of a given convex function.
+
+Suppose $f : \R^n \to \R$ is convex and differentiable, and we want to
+solve
+\begin{align*}
+\min_{\xx \in \R^n} & \ f(\xx)
+\end{align*}
+
+We would like to find $\xx^*$, a global minimizer of $f$.
+Suppose we start with some initial guess  $\xx_0$,
+and we want to update it to $\xx_1$ with $f(\xx_1) < f(\xx_0)$.
+If we can repeatedly make updates like this, maybe we eventually
+find a point with nearly minimum function value, i.e. some $\xxtil$ with $f(\xxtil) \approx f(\xx^*)$?
+
+Recall that $f(\xx_0+\ddelta) = f(\xx_0) + \grad f(\xx_0)^\trp\ddelta +
+o(\norm{\ddelta}_2)$.
+This means that if we choose
+${\xx_1 = \xx_0 - \lambda \grad f(\xx_0)}$, we get
+\[
+  f(\xx_0 - \lambda \grad f(\xx_0)) =
+  f(\xx_0) -\lambda \norm{\grad f(\xx_0)}_2^2 + o(\lambda \norm{\grad f(\xx_0)}_2)
+\]
+And because $f$ is convex, we know that $\grad f(\xx_0) \neq \veczero$
+unless we are already at a global minimum.
+So, for some small enough $\lambda > 0$, we should get $f(\xx_1) <
+f(\xx_0)$ unless we're already at a global minimizer.
+This idea of taking a step in the direction of $-\grad f(\xx_0)$ is
+what is called \emph{Gradient Descent}.
+% In fact, with some more work, we can argue that if we repeat this
+% procedure, we will get a sequence $\xx_1, \xx_2, \xx_3, \ldots$ s.t.
+% $f(\xx_i) \to f(\xx^*)$.\todo{do that? how does this square with the
+%   pathological Ford-Fulkerson!?}
+But how do we choose $\lambda$ each time? And
+does this lead to an algorithm that quickly reaches a point with close to minimal function value?
+To get good answers to these questions, we need to assume more about
+the function $f$ that we are trying to minimize.
+
+In the following subsection, we will see some conditions that
+suffice.
+But there are also many other settings where one can show that some
+form of gradient descent converges.
+
+\subsection{A Quantitative Bound on Changes in the Gradient}
+\boxdef{
+  Let $f: S \to \R$ be a differentiable
+  function, where $S\subseteq \R^n$ is convex and open.
+  We say that $f$ is $\beta$\emph{-gradient Lipschitz} iff for all $\xx,
+  \yy \in S$
+  \[
+    \norm{\grad f(\xx) - \grad f(\yy)}_2 \leq \beta \norm{\xx-\yy}_2
+    .
+  \]
+  We also refer to this as $f$ being $\beta$\emph{-smooth}.
+}
+
+\begin{proposition}
+\label{prp:hessiangradlip}
+  Consider a twice continuously differentiable $f: S \to \R$.
+  Then $f$ is $\beta$-gradient Lipschitz if and only if for all $\xx \in
+ S$,
+  $\norm{\HH_f(\xx)} \leq \beta$.
+\end{proposition}
+ You will prove this in Exercise 1 of this week's exercises.
+% \begin{proof}
+%   We leave the proof for Section/Exercises.
+%   \todo{phrasing and write-up}
+% \end{proof}
+
+\begin{proposition}
+  \label{prp:lipgradub}
+  Let $f: S \to \R$ be a $\beta$-gradient Lipschitz function.
+  Then for all $\xx, \yy \in S$,
+  % such that $[\xx,\yy] \in S$,
+  \[
+    f(\yy) \leq f(\xx) + \grad f(\xx)^\trp (\yy-\xx) + \frac{\beta}{2}
+    \norm{\xx-\yy}_2^2
+    \]
+\end{proposition}
+
+To prove this proposition, we need the following result from
+multi-variate calculus. This is a restricted form of the fundamental
+theorem of calculus for line integrals.
+
+\begin{proposition}
+  Let $f: S \to \R$ be a differentiable function, and consider
+  $\xx, \yy$ such that $[\xx,\yy] \in S$.
+  Let ${\xx_{\theta} = \xx + \theta (\yy - \xx)}$.
+  Then
+  \[
+    f(\yy) = f(\xx) + \int_{\theta = 0}^1 \grad f(\xx_{\theta})^\trp (\yy-\xx) d\theta
+    \]
+\end{proposition}
+Now, we're in a position to show Proposition~\ref{prp:lipgradub}
+\begin{proof}[Proof of Proposition~\ref{prp:lipgradub}]
+  Let $f: S \to \R$ be a $\beta$-gradient Lipschitz function.
+  Consider arbitrary $\xx, \yy \in S$ such that $[\xx,\yy] \in S$
+
+  \begin{align*}
+    f(\yy)
+    &= f(\xx) + \int_{\theta = 0}^1 \grad
+      f(\xx_{\theta})^\trp(\yy-\xx) d\theta
+    \\
+    &= f(\xx)
+     + \int_{\theta = 0}^1 \grad
+      f(\xx)^\trp(\yy-\xx) d\theta
+      + \int_{\theta = 0}^1
+      (\grad f(\xx_{\theta}) - \grad f(\xx ))^\trp(\yy-\xx) d\theta
+   \\
+    &         \tag*{Next we use Cauchy-Schwarz pointwise.}
+ \\
+    &\tag*{ We also evaluate the
+      first integral.}
+    \\
+    &\leq f(\xx)
+     + \grad f(\xx)^\trp(\yy-\xx)
+      + \int_{\theta = 0}^1
+      \norm{ \grad f(\xx_{\theta}) - \grad f(\xx ) } \norm{\yy-\xx}
+      d\theta
+    \\
+    &\tag*{Then we apply $\beta$-gradient Lipschitz and note
+      $\xx_\theta -\xx = \theta (\yy-\xx)$.}
+    \\
+    &\leq f(\xx)
+     + \grad f(\xx)^\trp(\yy-\xx)
+      + \int_{\theta = 0}^1
+    \beta \theta \norm{\yy-\xx}^2
+      d\theta
+      .
+      \\
+    &= f(\xx)
+     + \grad f(\xx)^\trp(\yy-\xx)
+      + \frac{\beta}{2} \norm{\yy-\xx}^2
+      .
+  \end{align*}
+\end{proof}
+
+\subsection{Analyzing Gradient Descent}
+It turns out that just knowing a function $f: \R^n \to \R$ is convex
+and $\beta$-gradient Lipschitz is enough to let us figure out a reasonable
+step size for Gradient Descent and let us analyze its convergence.
+
+We start at a point $\xx_0 \in \R^n$, and we try to find a
+point $\xx_1 = \xx_0 +\ddelta$ with lower function value.
+We will let our upper bound from Proposition~\ref{prp:lipgradub} guide
+us, in fact, we could ask, what is the \emph{best} update for
+minimizing this upper bound, i.e. a $\ddelta$ solving
+\[
+  \min_{\ddelta \in \R^n}
+  f(\xx_{0})
+     + \grad f(\xx_{0})^\trp\ddelta
+      + \frac{\beta}{2} \norm{\ddelta}^2
+\]
+We can compute the best according to this upper bound by noting
+first that function is convex and continuously differentiable,
+and hence will be minimized at any point where the gradient is zero.
+Thus we want
+$\veczero = \grad_{\ddelta} \left(
+ f(\xx_{0})
+     + \grad f(\xx_{0})^\trp\ddelta
+     + \frac{\beta}{2} \norm{\ddelta}^2
+\right)
+=
+\grad f(\xx_{0})
++
+\beta \ddelta
+$, which occurs at
+$\ddelta = -\frac{1}{\beta}\grad f(\xx_{0})$.
+
+Plugging in this value into the upper bound, we get that
+$f(\xx_1) \leq f(\xx_0) - \nicefrac{\norm{\grad f(\xx_{0})}_2^2}{2\beta}$.
+
+% \paragraph{The algorithm.}
+Now, as our algorithm, we will start with some guess $\xx_0$, and then
+at every step we will update our guess using the best step based on
+our Proposition~\ref{prp:lipgradub} upper bound on $f$ at $\xx_i$, and so we get
+\begin{align}
+\label{eq:gdstep}
+  \xx_{i+1} = \xx_{i}-\frac{1}{\beta}\grad f(\xx_{i})
+  \text{ and }
+    f(\xx_{i+1}) &\leq f(\xx_{i}) - \frac{\norm{\grad
+                 f(\xx_{i})}_2^2}{2\beta}
+  .
+\end{align}
+% Again, from the Proposition~\ref{prp:lipgradub} upper bound, we get
+% \begin{align*}
+
+%                  .
+% \end{align*}
+
+% \paragraph{Convergence analysis}
+Let us try to prove that our algorithm converges toward an $\xx$ with low
+function value.
+
+We will measure this by looking at
+\[
+  \gap_i =  f(\xx_{i}) - f(\xx^*)
+  \]
+  where $\xx^*$ is a global minimizer of $f$ (note that there may not
+  be a unique minimizer of $f$).
+We will try to show that this function value gap grows small.
+Using $f(\xx_{i+1})- f(\xx_{i}) =
+  \gap_{i+1}- \gap_i $, we get
+\begin{align}
+\label{eq:gdgapchange}
+ \gap_{i+1}- \gap_i &\leq - \frac{\norm{\grad
+  f(\xx_{i})}_2^2}{2\beta}
+\end{align}
+% \begin{align*}
+%   f(\xx_{i+1}) &\leq f(\xx_{i}) - \frac{\norm{\grad
+%                  f(\xx_{i})}_2^2}{2\beta}
+%   \\
+% \tag*{Use $f(\xx_{i+1})- f(\xx_{i}) =
+%   \gap_{i+1}- \gap_i $}
+%   \\
+%  \gap_{i+1}- \gap_i &\leq - \frac{\norm{\grad
+%   f(\xx_{i})}_2^2}{2\beta}
+% \end{align*}
+If the $\gap_i$  value is never too much bigger than $\frac{\norm{\grad
+  f(\xx_{i})}_2^2}{2\beta}$, then this should help us show we are making
+progress.
+But how much can they differ? We will now try to show a limit on this.
+
+Recall that in the previous chapter we showed the following theorem.
+\begin{theorem}\label{thm:convexlb}
+Let  $S$ be an open convex subset of $\mathbb{R}^n$, and
+let $f:S\to \mathbb{R}$ be a differentiable function.
+Then, $f$ is convex if and only if for any $\xx,\yy \in S$ we have that $f(\yy) \geq f(\xx) + \grad f(\xx)^\trp  (\yy-\xx)$.
+\end{theorem}
+
+
+Using the convexity of $f$ and the lower bound on
+convex functions given by Theorem~\ref{thm:convexlb}, we have that
+\begin{align}
+\label{eq:basiciterlb}
+f(\xx^*) \geq f(\xx_i) + \grad f(\xx_{i})^\trp (\xx^* - \xx_i)
+\end{align}
+Rearranging gets us
+\begin{align}
+\label{eq:convexubgapsmooth}
+  \gap_i &\leq \grad f(\xx_{i})^\trp (\xx_i - \xx^*)
+  \\
+ & \leq \norm{\grad f(\xx_{i})}_2 \norm{\xx_i - \xx^*}_2
+            \tag*{ by Cauchy-Schwarz.}
+\end{align}
+At this point, we are essentially ready to connect
+Equation~\eqref{eq:gdgapchange} with Equation~\eqref{eq:convexubgapsmooth}
+and analyze the convergence rate of our algorithm.
+
+However, at the moment, we see that the change $\gap_{i+1}- \gap_i$
+in how close we are to the optimum function value is governed by the norm of the gradient $\norm{\grad
+  f(\xx_{i})}_2$, while the size of the gap is related to \emph{both}
+this quantity and the distance $\norm{\xx_i - \xx^*}_2$ between the
+current solution $\xx_i$ and an optimum $\xx^*$.
+Do we need both or can we get rid of, say, the distance?
+Unfortunately, with this algorithm and for this class of functions, a
+dependence on the distance is necessary.
+However, we can simplify things considerably using the following
+observation, which you will prove in the exercises (Exercise 2):
+\begin{claim}
+  \label{clm:gdoptdist}
+  When running Gradient Descent as given by the step in
+  Equation~\eqref{eq:gdstep},  for all $i$
+  $\norm{\xx_i - \xx^*}_2 \leq \norm{\xx_0 - \xx^*}_2$.
+\end{claim}
+Combining this Claim with Equation~\eqref{eq:gdgapchange} and Equation~\eqref{eq:convexubgapsmooth},
+\begin{align}
+\label{eq:convexgapsmooth}
+  \gap_{i+1}- \gap_i
+  &\leq
+    -
+    \frac{1}{2\beta}
+    \cdot
+    \left(
+    \frac{\gap_i}{\norm{\xx_0 - \xx^*}_2 }
+    \right)^2
+\end{align}
+At this point, a simple induction will complete the proof of following result.
+\begin{theorem}
+  \label{thm:gdsmoothconv}
+  Let $f : \R^n \to \R$ be a $\beta$-gradient Lipschitz, convex
+  function.
+  Let $\xx_0$ be a given starting point,
+  and let $\xx^* \in \argmin_{\xx \in \R^n} f(\xx)$ be a minimizer of $f$.
+ The Gradient Descent algorithm given by
+  \[
+   \xx_{i+1} = \xx_{i} - \frac{1}{\beta} \grad f(\xx_{i})
+ \]
+ ensures that the $k$th iterate satisfies
+ \[
+   f(\xx_{k}) - f(\xx^*)\leq \frac{2\beta \norm{\xx_0 - \xx^*}_2^2}{k+1}
+   .
+   \]
+\end{theorem}
+Carrying out this induction is one of the Week 2 exercises (Exercise 3).
+
+\section{Accelerated Gradient Descent}
+
+
+It turns out that we can get an algorithm that converges substantially
+faster than Gradient Descent, using an approach known as
+\emph{Accelerated Gradient Descent}, which was developed by
+Nesterov~\cite{n83}.
+This algorithm in turn improved on some earlier results by Nemirovski and Yudin~\cite{ny83}.
+The phenomenon of acceleration was perhaps first understood in the context of
+quadratic functions, minimizing $\xx^\trp \AA \xx - \xx^\trp \bb$
+when $\AA$ is positive definite -- for this case, the Conjugate
+Gradient algorithm was developed independently by Hestenes and
+Stiefel~\cite{hs52} (here at ETH!), and by Lanczos~\cite{l52}.
+In the past few years, providing more intuitive explanations of
+acceleration has been a popular research topic.
+This presentation is based on an analysis of Nesterov's algorithm
+developed by Diakonikolas and Orecchia~\cite{do19}.
+
+% \todo{picture? discuss momentum?}
+
+We will adopt a slightly different approach to analyzing this
+algorithm than what we used in the previous section for Gradient Descent.
+
+We will use $\xx_0$ to denote the starting point of our algorithm, and
+we will produce a sequence of iterates $\xx_0, \xx_1, \xx_2, \ldots,
+\xx_k $.
+At each iterate $\xx_{i}$, we will compute the gradient $\grad
+f(\xx_{i})$.
+However, the way we choose  $\xx_{i+1}$ based on what we know so far
+will now be a little more involved than what we did for Gradient Descent.
+
+To help us understand the algorithm, we are going to introduce two
+more sequences of iterates $\yy_0, \yy_1, \yy_2, \ldots,
+\yy_k \in \R^n $ and $\vv_0, \vv_1, \vv_2, \ldots,
+\vv_k \in \R^n$.
+
+The sequence of $\yy_i$'s will be constructed to help us get as low a
+function value as possible at $f(\yy_i)$, which we will consider our
+current solution and the last iterate $\yy_k$ will be the output solution of
+our algorithm.
+
+The sequence of $\vv_i$'s will be constructed to help us get a lower
+bound on $f(\xx^*)$.
+
+By combining the upper bound on the function value of our current
+solution $f(\yy_i)$ with a lower bound on the function value at an
+optimal solution $f(\xx^*)$, we get an upper bound on the gap
+ $f(\yy_i)-f(\xx^*)$
+between
+the value of our solution and the optimal one.
+% We denote the gap by
+% $\gap_i = f(\yy_i)-f(\xx^*)$.
+Finally, each iterate $\xx_i$, which will be where we evaluate
+gradient $\grad f(\xx_{i})$, is chosen through a trade-off between
+wanting to reduce the upper bound and wanting to increase the lower bound.
+
+
+\paragraph{The upper bound sequence: $\yy_i$'s.}
+The point $\yy_i$ will be chosen from $\xx_i$ to minimize an upper
+bound on $f$ based at $\xx_i$.
+This is similar to what we did in the previous section.
+We let $\yy_i = \xx_i +\ddelta_i$
+and use choose $\ddelta_i$ to minimize the upper bound
+$ \ff(\yy_i) \leq f(\xx_{i})  + \grad f(\xx_{i})^\trp\ddelta_i
+      + \frac{\beta}{2} \norm{\ddelta_i}^2$, which gives us
+\[
+  \yy_i = \xx_{i}-\frac{1}{\beta}\grad f(\xx_{i})
+  \text{ and }
+    f(\yy_i) \leq f(\xx_{i}) - \frac{\norm{\grad
+                 f(\xx_{i})}_2^2}{2\beta}
+  .
+\]
+We will introduce a notation for this upper bound
+
+\begin{equation}
+  U_i = f(\yy_i) \leq  f(\xx_{i})
+  - \frac{\norm{\grad  f(\xx_{i})}_2^2}{2\beta}
+  .\label{eq:agdub}
+\end{equation}
+\paragraph{Philosophizing about lower bounds\protect\footnote{YMMV. People
+    have a lot of different opionions about how to understand acceleration, and you should take my thoughts with a grain of salt.}.}
+A crucial ingredient to establishing an upper bound on $\gap_i $ was a
+lower bound on $f(\xx^*)$.
+
+In our analysis of Gradient Descent, in Equation~\eqref{eq:convexubgapsmooth}, we used the
+lower bound ${f(\xx^*) \geq f(\xx_i) - \norm{\grad f(\xx_{i})}_2 \norm{\xx_i - \xx^*}_2 }$.
+%
+We can think of the Gradient Descent analysis as being based on a
+tension between two statements: Firstly that ``a large gradient implies we quickly approach
+the optimum'' and secondly ``the function value gap to optimum cannot exceed the magnitude of
+the current gradient (scaled by distance to opt)''.
+
+This analysis does not use that we have seen many different
+function values and gradients, and each of these can be used to
+construct a lower bound on the optimum value $f(\xx^*)$, and, in
+particular, it is not clear that the last gradient provides the best bound.
+To do better, we will try to use lower bounds that take advantage of
+all the gradients we have seen.
+
+\boxdef{
+We will adopt a new notation for inner products that sometimes is more
+convenient when dealing with large expressions:
+$\ip{\aa,\bb} \defeq \aa^\trp \bb $.
+}
+%
+\paragraph{The lower bound sequence: $\vv_i$'s.}
+We can introduce weights $a_i > 0$ for each step and combine the
+gradients we have observed into one lower bound based on a weighted
+average. Let us use $A_i = \sum_{j \leq i} a_j$ to denote the sum of
+the weights. Now a general lower bound on the function value at any
+$\vv \in \R^n$ is
+:
+\[
+  f(\vv)
+  \geq
+  \frac{1}{A_i}
+  \sum_{j \leq i} a_j \left(  f(\xx_j)
+    + \ip{\grad
+      f(\xx_j) , \vv - \xx_j}
+    \right)
+  \]
+ However, to use Cauchy-Schwarz on each individual term here to
+ instantiate this bound at $\xx^*$ does not give us anything useful.
+ Instead, we will employ a somewhat magical trick: we introduce a
+ regularization term
+ \[
+   \phi(\vv) \defeq \frac{\sigma}{2} \norm{ \vv -
+     \xx_0}_2^2
+   .
+ \]
+ We will choose the value $\sigma > 0$ later.
+ Now  we derive our lower bound $L_i$
+ \begin{align*}
+  f(\xx^*)
+  &\geq
+    \frac{1}{A_i}
+     \left(
+\phi(\xx^*)
+  +
+  \sum_{j \leq i} a_j  f(\xx_j)
+    + \ip{ a_j\grad
+      f(\xx_j) , \xx^* - \xx_j}
+ \right)
+  -
+ \frac{\phi(\xx^*)}{A_i}
+    \\
+   &\geq
+     \min_{\vv \in \R^n} \setof{
+    \frac{1}{A_i}
+     \left(
+\phi(\vv)
+  +
+  \sum_{j \leq i} a_j  f(\xx_j)
+    + \ip{ a_j\grad
+      f(\xx_{j}) ,\vv - \xx_j}
+  \right)
+     }
+     -
+     \frac{\phi(\xx^*)}{A_i}
+   \\
+   &= L_i
+ \end{align*}
+ We will let $\vv_i$ be the $\vv$ obtaining the minimum in the
+ optimization problem appearing in the definition of $L_i$, so that
+ \[
+   L_i
+   =
+   \frac{1}{A_i}
+   \left(
+     \phi(\vv_i)
+     +
+     \sum_{j \leq i} a_i  f(\xx_i)
+     + \ip{ a_i\grad
+       f(\xx_{i}) ,\vv_i - \xx_i}
+   \right)
+   -
+   \frac{\phi(\xx^*)}{A_i}
+\]
+\paragraph{How we will measure convergence.}
+We have designed the upper bound $U_i$ and the lower bound $L_i$ such
+that $\gap_i = f(\yy_i)-f(\xx^*) \leq U_i - L_i$.
+
+As you will show in Exercise~3, we can prove the
+convergence of Gradient Descent directly by an induction that
+establishes $1/\gap_i \leq C \cdot i $ for some constant $C$ depending
+on the Lipschitz gradient parameter $\beta$ and the distance $\norm{\xx_0
+  - \xx^*}_2$.
+
+To analyze Accelerated Gradient Descent, we will adopt a similar, but
+slightly different strategy, namely trying to show that $(U_i - L_i) r(i)$
+is non-increasing for some positive ``rate function'' $r(i)$. Ideally $r(i)$ should
+grow quickly, which would imply that $\gap_i$ quickly gets small.
+We will also need to show that $(U_0 - L_0) r(0) \leq C$ for some constant
+$C$ again depending on $\beta$ and $\norm{\xx_0 - \xx^*}_2$.
+%
+Then, we'll be able to conclude that
+\[
+\gap_i \cdot r(i) \leq (U_i - L_i) r(i) \leq (U_{i-1} - L_{i-1}) r(i-1) \leq
+\cdots \leq (U_0 - L_0) r(0) \leq C,
+\]
+and hence $\gap_i \leq C/r(i)$.
+
+This framework is fairly general. We could have also used it to
+analyze Gradient Descent, and it works for many other optimization
+algorithms too.
+
+We are going to choose our rate function $r(i)$ to be exactly $A_i$,
+which of course is no accident!
+As we will see, this interacts nicely with our lower
+bound $L_i$.
+Hence, our goals are to
+\begin{enumerate}
+\item provide an upper bound on $A_0 (U_0 - L_0)$,
+\item and show that $A_{i+1} (U_{i+1} - L_{i+1})  \leq A_{i} (U_{i} - L_{i}) $,
+\end{enumerate}
+
+\paragraph{Establishing the convergence rate.}
+Let's start by looking at the change in the upper bound scaled by our
+rate function:
+
+\begin{align}
+  \label{eq:ubgap}
+  A_{i+1}U_{i+1} - A_i U_i
+  =&
+  A_{i+1}\left( f(\yy_{i+1}) - f(\xx_{i+1}) \right)
+  -
+  A_{i}\left( f(\yy_{i}) - f(\xx_{i+1}) \right)
+  +
+  (A_{i+1}-A_{i}) f(\xx_{i+1})
+\\
+\leq &
+     A_{i+1}\left(
+     - \frac{\norm{\grad  f(\xx_{i+1})}_2^2}{2\beta}
+       \right)
+       & \tag*{First term controlled by Equation~\eqref{eq:agdub}.}
+  \\
+  &-
+     A_{i}
+    \ip{\grad f(\xx_{i+1}), \yy_{i} - \xx_{i+1}  }
+    \tag*{Second term bounded by Theorem~\ref{thm:convexlb}.}
+  \\
+   &+ a_{i+1} f(\xx_{i+1})
+     \tag*{Third term uses $a_{i+1} = A_{i+1}-A_{i}$.}
+\end{align}
+
+The solution $\vv_i$ to the minimization in the lower bound $L_i$
+turns out to be relatively simple to characterize.
+By using derivatives to find the optimum, we first analyze the initial
+value of the lower bound $L_0$.
+
+\newpage
+
+ \begin{claim}
+   \label{clm:lbinit}
+   \noindent
+   \begin{enumerate}
+   \item $\vv_0 = \xx_0 - \frac{a_0}{\sigma} \grad f(\xx_0)$
+   \item
+     \label{clm:lbinit:value}
+     $L_0 = f(\xx_0) - \frac{a_0}{2\sigma} \norm{\grad f(\xx_0)
+     }_2^2 - \frac{\sigma }{2 a_0}\norm{ \xx^* - \xx_0}_2^2 $.
+\end{enumerate}
+\end{claim}
+You will prove Claim~\ref{clm:lbinit} in the exercises for Week 3.
+Noting $A_0 = a_0$,
+we see from Equation~\eqref{eq:agdub} and Part~\ref{clm:lbinit:value}
+of Claim~\ref{clm:lbinit}, that
+\begin{align}
+  \label{eq:gapinit}
+  A_0( U_0 - L_0 ) \leq
+  \left(
+  \frac{a_0^2}{2\sigma}
+  -
+    \frac{a_0}{2\beta}
+  \right)
+  \norm{\grad f(\xx_0)}_2^2
+    +
+    \frac{\sigma }{2}\norm{ \xx^* - \xx_0}_2^2
+  % = \frac{\beta }{2}\norm{ \xx^* - \xx_0}_2^2
+\end{align}
+It will be convenient to introduce notation for the
+rescaled lower bound $A_iL_i$ \emph{without} optimizing over $\vv$.
+\[
+  m_i(\vv) =
+  \phi(\vv)
+   - \phi(\xx^*)
+  +
+  \sum_{j \leq i} a_j  f(\xx_j)
+    + \ip{ a_j\grad
+      f(\xx_{j}) ,\vv - \xx_j}
+  \]
+Thus $A_iL_i-A_{i+1}L_{i+1} = m_{i}(\vv_i) - m_{i+1}(\vv)$.
+Now, it is not too hard to show the
+following relationships.
+\begin{claim}
+  \label{clm:lbstep}
+   \noindent
+   \begin{enumerate}
+   \item
+     \label{enu:lbaroundopt}
+     $ m_{i}(\vv) = m_{i}(\vv_i) + \frac{\sigma}{2} \norm{ \vv -
+   \vv_i}_2^2$
+   \item  $m_{i+1}(\vv) = m_{i}(\vv)
+     + a_{i+1}  f(\xx_{i+1})
+     + \ip{ a_{i+1}\grad
+      f(\xx_{i+1}) ,\vv - \xx_{i+1}}$
+  \item  $\vv_{i+1} = \vv_i -  \frac{a_{i+1}}{\sigma} \grad f(\xx_{i+1})$
+   \end{enumerate}
+ \end{claim}
+And again, you will prove Claim~\ref{clm:lbstep} in the exercises for
+Week 3.
+\emph{Hint for Part~\ref{enu:lbaroundopt}: note that $m_i(v)$ is a quadratic function, miminimized at $v_i$ and
+  its Hessian equals $\sigma I$ at all $v$.}
+
+Given Claim~\ref{clm:lbstep}, we see that
+\begin{align}
+  \nonumber
+ A_iL_i-A_{i+1}L_{i+1}
+\\
+ &= m_{i}(\vv_i)  - m_{i+1}(\vv_{i+1})
+ \\
+ &=
+-  a_{i+1}  f(\xx_{i+1})
+-  \ip{ a_{i+1}\grad
+  f(\xx_{i+1}) ,\vv_{i+1} - \xx_{i+1}}
+-
+\frac{\sigma}{2} \norm{ \vv_{i+1} -
+   \vv_i}_2^2
+\\
+ &=
+ -  a_{i+1}  f(\xx_{i+1})
+-  \ip{ a_{i+1}\grad f(\xx_{i+1}) ,\vv_{i} - \xx_{i+1}}
++
+   \frac{a_{i+1}^2}{2\sigma} \norm{ \grad f(\xx_{i+1})}_2^2
+   \label{eq:lbgap}
+\end{align}
+This means that by combining Equation~\eqref{eq:ubgap}
+and~\eqref{eq:lbgap} we get
+\begin{align*}
+  \
+  A_{i+1}( U_{i+1} - L_{i+1})
+ -
+  A_{i}( U_{i} - L_{i})
+  \leq
+  \left(
+  \frac{-A_{i+1}}{2\beta}
+  +
+\frac{a_{i+1}^2}{2\sigma}
+  \right)
+  \norm{ \grad f(\xx_{i+1})}_2^2
+  %
+  \\
+  +  \ip{\grad f(\xx_{i+1}) ,
+  A_{i+1} \xx_{i+1}
+  - a_{i+1} \vv_{i}
+  - A_{i} \yy_{i}}
+  .
+\end{align*}
+%, again mainly using derivatives to characterize the optimum.
+
+Now, this means that $ A_{i+1}( U_{i+1} - L_{i+1}) - A_{i}( U_{i} -
+L_{i}) \leq 0$ if
+\[
+   A_{i+1} \xx_{i+1}
+  - a_{i+1} \vv_{i}
+  - A_{i} \yy_{i} = \veczero
+\text{ and }
+A_{i+1}/\beta \geq  a_{i+1}^2/\sigma
+\]
+
+We can get this by letting
+$\xx_{i+1} = \frac{
+A_{i} \yy_{i} + a_{i+1} \vv_{i}
+}{A_{i+1}}
+$, and $\sigma = \beta$ and $a_i = \frac{i+1}{2}$,
+which implies that $A_i = \frac{(i+1)(i+2)}{4} > a_i^2$.
+
+
+
+By Equation~\eqref{eq:gapinit}, these parameter choices also imply
+that
+\[
+  A_0 (U_0 - L_0) \leq \frac{\beta }{2}\norm{ \xx^* - \xx_0}_2^2  .
+\]
+Finally, by induction, we get
+$ A_{i}( U_{i} - L_{i})  \leq  \frac{\beta }{2}\norm{ \xx^* -
+  \xx_0}_2^2$.
+Dividing through by $A_i$ and using $\gap_i \leq  U_{i} - L_{i}$
+results in the following theorem.
+\begin{theorem}
+  Let $f : \R^n \to \R$ be a $\beta$-gradient Lipschitz, convex
+  function.
+  Let $\xx_0$ be a given starting point,
+  and let $\xx^* \in \argmin_{\xx \in \R^n} f(\xx)$ be a minimizer of
+  $f$.
+
+The Accelerated Gradient Descent algorithm given by
+\begin{align*}
+  a_i &= \frac{i+1}{2}, A_i = \frac{(i+1)(i+2)}{4}     \\
+ \vv_0 & = \xx_0 - \frac{1}{2\beta} \grad f(\xx_0) \\
+  \yy_{i} &= \xx_{i} - \frac{1}{\beta} \grad f(\xx_{i}) \\
+  \xx_{i+1} &=  \frac{
+A_{i} \yy_{i} + a_{i+1} \vv_{i}
+            }{A_{i+1}} \\
+  \vv_{i+1} &= \vv_{i}  - \frac{a_{i+1}}{\beta} \grad f(\xx_{i+1})
+\end{align*}
+ ensures that the $k$th iterate satisfies
+ \[
+   f(\xx_{k}) - f(\xx^*)\leq \frac{2 \beta \norm{\xx_0 - \xx^*}_2^2}{(k+1)(k+2)}
+   .
+ \]
+\end{theorem}
+%   Suppose that $\xx$ is a suboptimal feasible point, and $\xx^*$ is an
+% optimal feasible point, i.e. both satisfy the constraints and $f(\xx)
+% > f(\xx^*)$.
+% If we consider the set of candidate solutions
+% $\xx_{\theta} = (1-\theta)\xx + \theta \xx^*$ for $\theta \in [0,1]$,
+% the whole segment segment consists of feasible points,
+% and the value of the function is decreasing as $\theta$ increases.
+% So there is a at least one direction away from $\xx$ that consists of
+% feasible points and gives and improvement in function value.
+
+% If we start with a suboptimal point $\xx$
+%   and move in the direction of an optimal point $\xx^*$, the function
+%   value must improve along that direction.
+
+
+%   Another important reason is that
+%    if $g(\xx)$ is a convex function, then $\setof{\xx : \gg(\xx)
+%     \leq b}$ is a convex set. And the intersection of a collection of
+%   convex sets is convex.
+
+%  If we go back to our optimization framework
+% \begin{align*}
+% \min_{\xx \in \R^d}  f(\xx)\\
+% s.t. & \ g_1(\xx) \leq b_1 \\
+% 	& \ . \\
+% 	& \ . \\
+% 	& \ . \\
+% 	& \ g_m(\xx) \leq b_m
+% %
+
+% \end{align*}
+% we can see on the basis of that the set of feasible points is convex.
+
+% Suppose that $\xx$ is a suboptimal feasible point, and $\xx^*$ is an
+% optimal feasible point, i.e. both satisfy the constraints and $f(\xx)
+% > f(\xx^*)$.
+% If we consider the set of candidate solutions
+% $\xx_{\theta} = (1-\theta)\xx + \theta \xx^*$ for $\theta \in [0,1]$,
+% the whole segment segment consists of feasible points,
+% and the value of the function is decreasing as $\theta$ increases.
+% So there is a at least one direction away from $\xx$ that consists of
+% feasible points and gives and improvement in function value.
+
+
+\FloatBarrier
+
+
+%\bibliographystyle{alpha}
+%\bibliography{refs}
+
+
+
+
+%\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% TeX-engine: luatex
+%%% End:

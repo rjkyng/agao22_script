@@ -1,0 +1,404 @@
+%  RASMUS  packages
+\usepackage{blindtext}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{placeins}
+\usepackage{graphicx}
+
+\usepackage{fancybox}
+\usepackage{hyperref}
+
+\usepackage{amsmath,amsfonts,amsthm,amssymb,xcolor}
+% \let\amsboldsymbol\boldsymbol % if you want to see the bad
+% boldsymbol for comparison
+\usepackage{bm} % fixes boldsymbol
+
+\usepackage{nicefrac}
+
+\usepackage{float}
+
+
+% switched to algorithm2e in lecture 9
+% \usepackage{algorithm} %ctan.org\pkg\algorithms
+% \usepackage{algorithmic}
+% \usepackage{algorithmicx}
+% \usepackage[noend]{algpseudocode}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{warning}[theorem]{Warning}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\newtheorem{pseudotheorem}{Pseudotheorem}[section]
+\newtheorem{pseudoclaim}[theorem]{Pseudoclaim}
+
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newtheorem*{theorem*}{Theorem}
+\newtheorem*{corollary*}{Corollary}
+\newtheorem*{conjecture*}{Conjecture}
+\newtheorem*{lemma*}{Lemma}
+\newtheorem*{thm*}{Theorem}
+\newtheorem*{prop*}{Proposition}
+\newtheorem*{obs*}{Observation}
+\newtheorem*{definition*}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{remark*}{Remark}
+\newtheorem*{rec*}{Recommendation}
+
+\newenvironment{fminipage}%
+  {\begin{Sbox}\begin{minipage}}%
+  {\end{minipage}\end{Sbox}\fbox{\TheSbox}}
+
+\newenvironment{algbox}[0]{\vskip 0.2in
+\noindent 
+\begin{fminipage}{6.3in}
+}{
+\end{fminipage}
+\vskip 0.2in
+}
+
+
+\let\muchl\ll
+
+\def\pleq{\preccurlyeq}
+\def\pgeq{\succcurlyeq}
+\def\pge{\succ}
+\def\ple{\prec}
+
+\def\Approx#1{\approx_{#1}}
+
+%\def\Span#1{\textbf{Span}\left(#1  \right)}
+\def\bvec#1{{\mbox{\boldmath $#1$}}}
+
+
+\newcommand\congestion{\mathit{cong}}
+
+\def\prob#1#2{\mbox{Pr}_{#1}\left[ #2 \right]}
+\def\pvec#1#2{\vec{\mbox{P}}^{#1}\left[ #2 \right]}
+\def\expec#1#2{{\mathbb{E}}_{#1}\left[ #2 \right]}
+\def\var#1{\mbox{\bf Var}\left[ #1 \right]}
+
+\def\defeq{\stackrel{\mathrm{def}}{=}}
+\def\setof#1{\left\{#1  \right\}}
+\def\sizeof#1{\left|#1  \right|}
+
+
+\def\trace#1{\mathrm{Tr} \left(#1 \right)}
+
+\def\floor#1{\left\lfloor #1 \right\rfloor}
+\def\ceil#1{\left\lceil #1 \right\rceil}
+
+\def\dim#1{\mathrm{dim} (#1)}
+\def\sgn#1{\mathrm{sgn} (#1)}
+
+\def\union{\cup}
+\def\intersect{\cap}
+\def\Union{\bigcup}
+\def\Intersect{\bigcap}
+
+\def\abs#1{\left|#1  \right|}
+
+\def\norm#1{\left\| #1 \right\|}
+\def\smallnorm#1{\| #1 \|}
+
+\newcommand\grad{\boldsymbol{\nabla}}
+\newcommand\D[2]{D#1[#2]}
+
+\newcommand*\diff{\mathop{}\!\mathrm{d}}
+\newcommand*\Diff[1]{\mathop{}\!\mathrm{d^#1}}
+
+\newcommand\ip[1]{\left< #1 \right>}
+
+
+\newcommand{\sym}[1]{\mathrm{sym} (#1)}
+
+
+
+\def\calC{\mathcal{C}}
+\def\calD{\mathcal{D}}
+\def\calE{\mathcal{E}}
+\def\calF{\mathcal{F}}
+\def\calG{\mathcal{G}}
+\def\calL{\mathcal{L}}
+\def\calS{\mathcal{S}}
+\def\calT{\mathcal{T}}
+\def\calM{\mathcal{M}}
+
+\newcommand\calDD{\boldsymbol{\calD}}
+
+\newcommand\DDelta{\boldsymbol{\mathit{\Delta}}}
+\newcommand\Ppsi{\boldsymbol{\mathit{\Psi}}}
+\newcommand\PPsi{\boldsymbol{\mathit{\Psi}}}
+\newcommand\ppsi{\boldsymbol{\mathit{\psi}}}
+\newcommand\pphi{\boldsymbol{\mathit{\phi}}}
+\newcommand\PPhi{\boldsymbol{\Phi}}
+%\newcommand\Llambda{\boldsymbol{\mathit{\Lambda}}}
+\newcommand\LLambda{\boldsymbol{\mathit{\Lambda}}}
+\newcommand\PPi{\boldsymbol{\Pi}}
+
+\newcommand\ppi{\boldsymbol{\pi}}
+\newcommand\cchi{\boldsymbol{\chi}}
+\newcommand\aalpha{\boldsymbol{\alpha}}
+\newcommand\bbeta{\boldsymbol{\beta}}
+\newcommand\ggamma{\boldsymbol{\gamma}}
+\newcommand\ddelta{\boldsymbol{\delta}}
+
+\newcommand\rrho{\boldsymbol{\rho}}
+\newcommand\xxi{\boldsymbol{\xi}}
+%\newcommand\cchi{\boldsymbol{\chi}}
+
+\newcommand\er{R_{\text{eff}}}
+
+
+\def\aa{\pmb{\mathit{a}}}
+\newcommand\bb{\boldsymbol{\mathit{b}}}
+\newcommand\cc{\boldsymbol{\mathit{c}}}
+\newcommand\dd{\boldsymbol{\mathit{d}}}
+\newcommand\ee{\boldsymbol{\mathit{e}}}
+\newcommand\ff{\boldsymbol{\mathit{f}}}
+\renewcommand\gg{\boldsymbol{\mathit{g}}}
+\newcommand\ii{\boldsymbol{\mathit{i}}}
+\newcommand\jj{\boldsymbol{\mathit{j}}}
+\newcommand\kk{\boldsymbol{\mathit{k}}}
+\renewcommand\ll{\boldsymbol{\mathit{l}}}
+\newcommand\pp{\boldsymbol{\mathit{p}}}
+\newcommand\qq{\boldsymbol{\mathit{q}}}
+\newcommand\bs{\boldsymbol{\mathit{s}}}
+\newcommand\nn{\boldsymbol{\mathit{n}}}
+\newcommand\rr{\boldsymbol{\mathit{r}}}
+\renewcommand\ss{\boldsymbol{\mathit{s}}}
+\def\tt{\boldsymbol{\mathit{t}}}
+\newcommand\uu{\boldsymbol{\mathit{u}}}
+\newcommand\vv{\boldsymbol{\mathit{v}}}
+\newcommand\ww{\boldsymbol{\mathit{w}}}
+\newcommand\yy{\boldsymbol{\mathit{y}}}
+\newcommand\zz{\boldsymbol{\mathit{z}}}
+\newcommand\xx{\boldsymbol{\mathit{x}}}
+
+\newcommand\veczero{\boldsymbol{0}}
+\newcommand\vecone{\boldsymbol{1}}
+
+\newcommand\matzero{\boldsymbol{0}}
+\newcommand\matone{\boldsymbol{1}}
+
+\newcommand{\matlow}{\boldsymbol{\mathit{{\mathcal{L}}}}}
+\newcommand{\matlowtil}{\boldsymbol{\mathit{\widetilde{\mathcal{L}}}}}
+\newcommand{\matlowhat}{\boldsymbol{\mathit{\widehat{\mathcal{L}}}}}
+
+\newcommand{\matup}{\boldsymbol{\mathit{{\mathcal{U}}}}}
+
+
+\renewcommand\AA{\boldsymbol{\mathit{A}}}
+\newcommand\BB{\boldsymbol{\mathit{B}}}
+\newcommand\CC{\boldsymbol{\mathit{C}}}
+\newcommand\DD{\boldsymbol{\mathit{D}}}
+\newcommand\EE{\boldsymbol{\mathit{E}}}
+\newcommand\GG{\boldsymbol{\mathit{G}}}
+\newcommand\HH{\boldsymbol{{H}}}
+\newcommand\II{\boldsymbol{\mathit{I}}}
+\newcommand\JJ{\boldsymbol{\mathit{J}}}
+\newcommand\KK{\boldsymbol{\mathit{K}}}
+\newcommand\NN{\boldsymbol{\mathit{N}}}
+\newcommand\MM{\boldsymbol{\mathit{M}}}
+\newcommand\LL{\boldsymbol{\mathit{L}}}
+\newcommand\PP{\boldsymbol{\mathit{P}}}
+\newcommand\RR{\boldsymbol{\mathit{R}}}
+\renewcommand\SS{\boldsymbol{\mathit{S}}}
+\newcommand\TT{\boldsymbol{\mathit{T}}}
+\newcommand\UU{\boldsymbol{\mathit{U}}}
+\newcommand\WW{\boldsymbol{\mathit{W}}}
+\newcommand\VV{\boldsymbol{\mathit{V}}}
+\newcommand\XX{\boldsymbol{\mathit{X}}}
+\newcommand\YY{\boldsymbol{\mathit{Y}}}
+
+
+
+\newcommand\MMtil{\boldsymbol{\mathit{\tilde{M}}}}
+\newcommand\AAtil{\boldsymbol{\mathit{\tilde{A}}}}
+\newcommand\BBtil{\boldsymbol{\mathit{\tilde{B}}}}
+\newcommand\LLtil{\boldsymbol{\mathit{\tilde{L}}}}
+\newcommand\MMtilde{\boldsymbol{\mathit{\tilde{M}}}}
+\newcommand\XXtil{\boldsymbol{\mathit{\tilde{X}}}}
+
+\newcommand\AAn{\boldsymbol{\mathcal{A}}}
+\newcommand\ZZ{\boldsymbol{\mathit{Z}}}
+
+\newcommand\AAhat{\boldsymbol{\widehat{\mathit{A}}}}
+\newcommand\AAapprox{\boldsymbol{\widetilde{\mathit{A}}}}
+\newcommand\DDhat{\boldsymbol{\widehat{\mathit{D}}}}
+\newcommand\DDapprox{\boldsymbol{\widetilde{\mathit{D}}}}
+\newcommand\LLhat{\boldsymbol{\widehat{\mathit{L}}}}
+\newcommand\LLapprox{\boldsymbol{\widetilde{\mathit{L}}}}
+\newcommand\MMhat{\boldsymbol{\widehat{\mathit{M}}}}
+\newcommand\MMapprox{\boldsymbol{\widetilde{\mathit{M}}}}
+\newcommand\ZZhat{\boldsymbol{\widehat{\mathit{Z}}}}
+
+\newcommand\DDtil{\boldsymbol{\widetilde{\mathit{D}}}}
+
+\newcommand\fftil{\boldsymbol{\tilde{\mathit{f}}}}
+\newcommand\sstil{\boldsymbol{\tilde{\mathit{s}}}}
+\newcommand\xxtil{\boldsymbol{\tilde{\mathit{x}}}}
+\newcommand\yytil{\boldsymbol{\tilde{\mathit{y}}}}
+\newcommand\wwtil{\boldsymbol{\tilde{\mathit{w}}}}
+
+\newcommand\ddeltatil{\boldsymbol{\tilde{\mathit{\delta}}}}
+
+
+\newcommand\Otil{\widetilde{O}}
+
+\newcommand\xhat{{\hat{{x}}}}
+\newcommand\uhat{{\hat{{u}}}}
+\newcommand\uuhat{\boldsymbol{\mathit{\hat{u}}}}
+\newcommand\vhat{{\hat{{v}}}}
+\newcommand\what{{\hat{{w}}}}
+
+\newcommand\Ghat{{\widehat{{G}}}}
+\newcommand\GGhat{\boldsymbol{\widehat{G}}}
+
+\newcommand\Ehat{{\widehat{{E}}}}
+
+
+\newcommand\R{\mathbb{R}}
+\newcommand\N{\mathbb{N}}
+
+\newcommand\ffhat{\boldsymbol{\hat{\mathit{f}}}}
+
+\newcommand\cchat{\boldsymbol{\widehat{\mathit{c}}}}
+\newcommand\sshat{\boldsymbol{\mathit{\widehat{s}}}}
+\newcommand\xxhat{\boldsymbol{\mathit{\widehat{x}}}}
+\newcommand\yyhat{\boldsymbol{\widehat{\mathit{y}}}}
+\newcommand\xxbar{\overline{\boldsymbol{\mathit{x}}}}
+\newcommand\yybar{\overline{\boldsymbol{\mathit{y}}}}
+\newcommand\xxstar{{\boldsymbol{\mathit{x}}^{*}}}
+\newcommand\yystar{{\boldsymbol{\mathit{y}}^{*}}}
+
+
+\newcommand\ffbar{\overline{\boldsymbol{\mathit{f}}}}
+
+
+\newcommand\ddeltabar{\boldsymbol{\bar{\mathit{\delta}}}}
+\newcommand\ddeltahat{\boldsymbol{\hat{\mathit{\delta}}}}
+
+
+
+\newcommand\energy{\mathcal{E}}
+
+
+\newcommand{\todo}[1]{{\bf \color{red} TODO: #1}}
+\newcommand{\todolow}[1]{{\bf \color{orange} TODOLOW: #1}}
+
+\newcommand{\richard}[1]{{\bf \color{green} Richard: #1}}
+\newcommand{\rasmus}[1]{{\bf \color{olive} Rasmus: #1}}
+\newcommand{\ahad}[1]{{\bf \color{olive} Ahad: #1}}
+
+
+\newcommand{\expct}[2]{{}\mathop{\mathbb{E}}_{#1}\left[#2\right]}
+\newcommand{\E}[1]{\mathop{{}\mathbb{E}}\left[#1\right]}
+%% https://tex.stackexchange.com/questions/56765/getting-the-expectation-symbol-to-behave-like-sum-instead-of-sigma
+%% extra {} inside mathop gives nicer (standard) vertical placement of E
+\newcommand{\Var}[1]{\mathop{{}Var}\left[#1\right]}
+\newcommand{\Ex}[1]{{}\mathop{\mathbb{E}}_{#1}}
+\newcommand\tr{\mathrm{Tr}}
+
+
+%%%%% LINEAR ALGEBRA
+
+\newcommand{\schurto}[2]{\ensuremath{\textsc{Sc}\!\left[#1\right]_{#2}}}
+% \newcommand{\schurto}[2]{\ensuremath{\textsc{Sc}\left[#1\right]_{#2}}}
+
+%{$\textsc{Sc}\left[#1\right]_{#2}$}
+% \newcommand{\schurto}[2]{\textsc{Sc}\left(#1, #2\right)}
+%\newcommand{\schurto}[2]{\left[{#1}\right]_{\to #2}}
+\renewcommand{\sc}[2]{\schurto{#1}{#2}}
+
+%transpose
+\newcommand{\trp}{\top}
+
+%pseudoinverse
+\newcommand{\pinv}{+}
+
+
+\newcommand{\proj}{\PPi}
+
+\DeclareMathOperator{\nnz}{nnz}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\val}{val}
+
+\DeclareMathOperator*{\diag}{diag}
+\DeclareMathOperator*{\Span}{span}
+
+%\DeclareMathOperator*{\ker}{ker}
+\DeclareMathOperator*{\im}{im}
+
+%%%%% LAYOUT
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+ \setlength{\itemsep}{2pt}
+ \setlength{\parskip}{1pt}
+}{\end{enumerate}}
+\newenvironment{tight_itemize}{
+\begin{itemize}
+ \setlength{\itemsep}{2pt}
+ \setlength{\parskip}{1pt}
+}{\end{itemize}}
+\newenvironment{tight_description}{
+\begin{description}
+ \setlength{\itemsep}{2pt}
+ \setlength{\parskip}{1pt}
+}{\end{description}}
+
+\newcommand*{\vertbar}{\rule[-1ex]{0.5pt}{2.5ex}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+
+%Basics
+\newcommand{\new}[1]{{\em #1\/}}		% New term (set in italics).
+
+\newcommand{\boxwidth}{\dimexpr\linewidth-2em\relax}
+
+\newcommand{\boxdef}[1]
+{
+\fbox{
+\begin{minipage}{\boxwidth}
+\begin{definition}
+{#1}
+\end{definition}
+\end{minipage}
+}
+}
+
+\newcommand{\boxthm}[1]
+{
+\fbox{
+\begin{minipage}{\boxwidth}
+\begin{theorem}
+{#1}
+\end{theorem}
+\end{minipage}
+}
+}
+
+\newcommand{\boxfact}[1]
+{
+\fbox{
+\begin{minipage}{\boxwidth}
+%\begin{theorem*}
+\emph{{#1}
+%\end{theorem*}
+}
+\end{minipage}
+}
+}

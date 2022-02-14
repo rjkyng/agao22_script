@@ -1,0 +1,535 @@
+% \documentclass[draft,11pt]{article}
+%\documentclass[11pt]{article}
+
+\subsection{Eigenvalue Bounds Beyond Test Vectors}
+
+In the previous sections, we first saw a complete characterization of the
+eigenvalues and eigenvectors of the unit weight complete graph on $n$
+vertices, $K_n$. Namely, $\LL_{K_n} = n\II - \vecone \vecone^\trp$, and
+this means that \emph{every} vector $\yy \perp \vecone$ is an
+eigenvector of eigenvalue $n$.
+
+We then looked at eigenvalues of $P_n$, the unit weight path on $n$
+vertices, and we showed using \emph{test vector} bounds that
+
+\begin{equation}
+  \label{eq:testvectorbounds}
+\lambda_2(\LL_{P_n}) \leq \frac{12}{n^2} \text{ and } 1 \leq
+\lambda_n(\LL_{P_n}).
+\end{equation}
+%
+Ideally we would like to prove an almost matching lower bound on
+$\lambda_2$ and an almost matching upper bound on $\lambda_n$, but it
+is not clear how to get that from the Courant-Fischer theorem.
+
+To get there, we start we need to introduce some more tools.
+% The Courant-Fischer theorem is not as helpful when we want to prove lower bounds on $\lambda_2$. To prove lower bounds, we need the form with a maximum on the outside, which gives
+% \begin{align*}
+% \lambda_2 \geq \max_{S : \dim{S} = n - 1 } \min_{ \vv\in S } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}
+% \end{align*}
+% This is not too helpful, as it is difficult to prove lower bounds on
+% \begin{align*}
+% \min_{ \vv\in S } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}
+% \end{align*}
+% over a space $S$ of large dimension. We need another technique.
+
+\subsection{The Loewner Order, aka. the Positive Semi-Definite Order}
+We'll now introduce an ordering on symmetric matrices called the
+\emph{Loewner order}, which I also like to just call the positive
+semi-definite order.
+As we will see in a moment, it is a partial order on symmetric matrices, we denote
+it by ``$\preceq$''.
+For conveniece, we allow ourselves to both write  $\AA \preceq \BB$
+and equivalently $\BB \succeq \AA$.
+
+For a symmetric matrix $\AA \in \R^{n \times n}$ we define that
+\begin{align*}
+\AA \succeq \matzero
+\end{align*}
+if and only if $\AA$ is positive semi-definite.
+
+More generally, when we have two symmetric matrices $\AA, \BB \in
+\R^{n \times n}$, we will write
+
+\begin{equation}
+  \label{eq:psdorder}
+  \AA \preceq \BB
+  \text{ if and only if for all } \xx \in \R^n
+  \text{ we have } \xx^{\trp} \AA \xx \leq \xx^{\trp} \BB
+  \xx
+\end{equation}
+
+This is a partial order, because it satisfies the three requirements
+of
+\begin{enumerate}
+\item Reflexivity: $\AA \preceq \AA$.
+\item Anti-symmetry:
+  $\AA \preceq \BB$ and $\BB \preceq \AA$
+  implies $\AA = \BB$
+\item Transitivity:    $\AA \preceq \BB$ and $\BB \preceq \CC$
+  implies $\AA \preceq \CC$
+\end{enumerate}
+Check for yourself that these properties hold!
+
+The PSD order has other very useful properties:
+$\AA \preceq \BB$ implies $\AA + \CC \preceq \BB + \CC$ for any
+symmetric matrix $\CC$. Convince yourself of this too!
+
+And, combining this observation with transitivity, we can see that
+$\AA \preceq \BB$  and $\CC\preceq \DD$
+implies ${\AA + \CC \preceq \BB + \DD}$.
+
+Here is another useful property: If $\matzero \preceq \AA$ then for all $\alpha \geq 1$
+\[
+ \frac{1}{\alpha} \AA \preceq \AA \preceq \alpha \AA.
+\]
+
+Here is another one:
+\begin{claim}
+  \label{clm:eigorderfrompsdorder}
+If $\AA \preceq \BB$, then for all $i$
+\[
+\lambda_i(\AA) \leq \lambda_i(\BB).
+\]
+\end{claim}
+\begin{proof}
+  We can prove this Claim by applying the subspace version of the
+  Courant-Fischer theorem.
+\[
+\lambda_i(\AA) =
+\min_{
+      \substack{
+        \mathrm{subspace~} W \subseteq \R^n
+        \\
+        \dim{W} = i
+      }
+    }
+    \max_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+\leq
+ \min_{
+      \substack{
+        \mathrm{subspace~} W \subseteq \R^n
+        \\
+        \dim{W} = i
+      }
+    }
+    \max_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \BB\xx}{\xx^\trp\xx}
+= \lambda_i(\BB).
+\]
+\end{proof}
+Note that the converse of Clam~\ref{clm:eigorderfrompsdorder} is very
+much false, for example the matrices
+$ \AA =
+\begin{pmatrix}
+  2 & 0 \\
+  0 & 1
+\end{pmatrix}$
+and $\BB = \begin{pmatrix}
+  1 & 0 \\
+  0 & 2
+\end{pmatrix}$ have equal eigenvalues, but both $\AA \not\preceq \BB$ and
+$\BB \not\preceq \AA$.
+
+\begin{remark}
+  It's useful to get used to and remember some of the properties of the Loewner
+  order, but all the things we have established so far are almost
+  immediate from the basic characterization in
+  Equation~\eqref{eq:psdorder}.
+  So, ideally, don't memorize all these facts, instead, try to see that
+  they are simple consequences of the definition.
+\end{remark}
+
+\subsection{Upper Bounding a Laplacian's $\lambda_n$ Using Degrees}
+In an earlier chapter, we observed that for any graph $G=(V,E,\ww)$,
+$\LL = \DD - \AA \succeq \matzero$.
+We can see this from
+$\xx^\top (\DD-\AA) \xx = \sum_{ (u,v) \in E } \ww(u,v)
+( \xx(u) - \xx(v) )^2 \geq 0$.
+Similarly $\DD + \AA \succeq \matzero$. because
+$\xx^\top (\DD+\AA) \xx = \sum_{ (u,v) \in E } \ww(u,v)
+( \xx(u) + \xx(v) )^2 \geq 0$.
+But this means that $-\AA \preceq \DD$ and hence $\LL = \DD-\AA
+\preceq 2\DD$.
+
+So, for the path graph $P_n$, we have
+$\LL_{P_n} \preceq \DD-\AA \preceq 2\DD \preceq 4 \II$.
+So by Claim~\ref{clm:eigorderfrompsdorder}
+\begin{equation}
+  \label{eq:pathlambdamaxub}
+\lambda_n(\LL_{P_n}) \leq 4.
+\end{equation}
+We can see that our test vector-based lower bound on $\lambda_n(\LL_{P_n})$ from
+Equation~\eqref{eq:testvectorbounds} is tight up
+to a factor 4.
+
+Since this type of argument works for any unit weight graph, it proves the following claim.
+\begin{claim}
+  \label{clm:lambdamaxfromeig}
+  For any unit weight graph $G$,
+  $\lambda_{n}(\LL_G) \leq 2 \max_{v
+    \in V} \mathop{degree}(v)$.
+\end{claim}
+This is tight on a graph consisting of a single edge.
+
+\subsection{The Loewner Order and Laplacians of Graphs.}
+It's sometimes convenient to overload the for the PSD order to also
+apply to graphs. We will write
+\begin{align*}
+G \preceq H
+\end{align*}
+if $\LL_{G} \preceq
+\LL_H$.
+
+For example, given two unit weight graphs
+$G = (V,E)$ and $H = (V,F)$, if $H = (V,F)$ is a subgraph of $G$,
+then
+\begin{align*}
+\LL_H \preceq \LL_G.
+\end{align*}
+
+We can see this from the Laplacian quadratic form:
+\begin{align*}
+\xx^\top \LL_G \xx = \sum_{ (u,v) \in E } \ww(u,v) ( \xx(u) - \xx(v) )^2.
+\end{align*}
+Dropping edges will only decrease the value of the quadratic form. The
+same is for decreasing the weights of edges.
+The graph order notation is especially useful when we allow for
+scaling a graph by a constant, say $c > 0$,
+\begin{align*}
+c \cdot H \preceq G
+\end{align*}
+What is $c \cdot H$? It is the same graph as $H$, but the weight of
+every edge is multiplied by $c$.
+Now we can make statements like $\frac{1}{2} H \preceq G \preceq 2 H$,
+which turn out to be useful notion of the two graphs approximating
+each other.
+
+% \subsection{Dan}
+% I begin by recalling an extremely useful piece of notation that is used in the Optimization community. For a symmetric matrix $\AA$, we write
+% \begin{align*}
+% \AA \succeq 0
+% \end{align*}
+% if $\AA$ is positive semidefinite. That is, if all of the eigenvalues of $\AA$ are nonnegative, which is equivalent to
+% \begin{align*}
+% \vv^\top \AA \vv\geq 0,
+% \end{align*}
+% for all $\vv$. We similarly write
+% \begin{align*}
+% \AA \succeq {\bf B}
+% \end{align*}
+% if
+% \begin{align*}
+% \AA - {\bf B} \succeq 0
+% \end{align*}
+% which is equivalent to
+% \begin{align*}
+% \vv^\top \AA \vv\geq \vv^\top {\bf B} \vv
+% \end{align*}
+% for all $\vv$.
+
+% The relation $\preceq$ is an example of a partial order. It applies to some pairs of symmetric matrices, while others are incomparable. But, for all pairs to which it does apply, it acts like an order. For example, we have
+% \begin{align*}
+% \AA \succeq {\bf B}, \mathrm{~and~} {\bf B} \succeq {\bf C} \mathrm{~implies~} \AA \succeq {\bf C},
+% \end{align*}
+% and
+% \begin{align*}
+% \AA \succeq {\bf B} \mathrm{~implies~} \AA + {\bf C} \succeq {\bf B} + {\bf C},
+% \end{align*}
+% for symmetric matrices ${\cal A}$, ${\cal B}$ and ${\cal C}$.
+
+% I find it convenient to overload this notation by defining it for graphs as well. Thus, I'll write
+% \begin{align*}
+% G \succeq H
+% \end{align*}
+% if $\LL_{G} \succeq \LL_H$.
+
+% For example, if $G = (V,E)$ is a graph and $H = (V,F)$ is a subgraph of $G$, then
+% \begin{align*}
+% \LL_G \succeq \LL_H.
+% \end{align*}
+
+% To see this, recall the Laplacian quadratic form:
+% \begin{align*}
+% \xx^\top \LL_G \xx = \sum_{ (u,v) \in E } w_{u,v} ( \xx(u) - \xx(v) )^2.
+% \end{align*}
+% It is clear that dropping edges can only decrease the value of the quadratic form. The same holds for decreasing the weights of edges.
+
+% This notation is most powerful when we consider some multiple of a graph. Thus, I could write
+% \begin{align*}
+% G \succeq c \cdot H, \mathrm{~for~some~} c > 0.
+% \end{align*}
+% What is $c \cdot H$? It is the same graph as $H$, but the weight of every edge is multiplied by $c$.
+
+% Using the Courant-Fischer Theorem, we can prove
+% \begin{lemma}
+% If $G$ and $H$ are graphs such that
+% \begin{align*}
+%  G \succeq c \cdot H,
+% \end{align*}
+% then
+% \begin{align*}
+% \lambda_k (G) \geq c \cdot \lambda_k(H), \mathrm{~for~all~} k.
+% \end{align*}
+% \end{lemma}
+% \begin{proof}
+% The Courant-Fischer Theorem tells us that
+% \begin{align*}
+% \lambda_k (G)
+% = & ~ \min_{ S \subseteq \R^n, \dim{S} = k } \max_{ \xx \in S }
+%  \frac{ \xx^\top \LL_G \xx }{ \xx^\top \xx } \\
+% \geq & ~ c \dot \min_{ S \subseteq \R^n, \dim{S} = k } \max_{ \xx \in S } \frac{ \xx^\top L_H \xx }{ \xx^\top \xx } \\
+% = & ~ c \cdot \lambda_k (H).
+% \end{align*}
+% \end{proof}
+
+% \begin{corollary}
+% Let $G$ be a graph and let $H$ be obtained by either adding an edge to $G$ or increasing the weight of an edge in $G$. Then, for all $i$,
+% \begin{align*}
+% \lambda_i (G) \leq \lambda_i (H).
+% \end{align*}
+% \end{corollary}
+
+
+% \subsection{Approximations of Graphs}
+% An idea that we will use in later lectures is that one graph approximations another if their Laplacian quadratic forms are similar. For example, we will say that $H$ is a $c$-approximation of $G$ if
+% \begin{align*}
+% c \cdot H \succeq G \succeq H /c.
+% \end{align*}
+% Surprising approximations exist.
+
+% For example, expander graphs are very sparse approximations of the complete graph. For example, the following is known
+% \begin{theorem}
+% For every $\epsilon > 0$, there exists a $d > 0$ such that for all sufficiently large $n$ there is a $d$-regular graph $G_n$ that is $(1+\epsilon)$-approximation of $K_n$.
+% \end{theorem}
+
+% These graphs have many fewer edges than the complete graphs!
+% In a latter lecture we will also prove that every graph can be well-approximated by a sparse graph.
+
+
+\subsection{The Path Inequality}
+Now, we'll see a general tool
+for comparing two graphs $G$ and $H$ to prove
+an inequalities like $c H
+\preceq G$ for some constant $c$.
+Our tools won't necessarily work well for all cases, but we'll see
+some examples where they do.
+
+
+% By now you should be wondering, ``how do we prove that $G \succeq c \cdot H$ for some graph $G$ and $H$?'' Not too many ways are known. We'll do it by proving some inequalities of this form for some of the simplest graphs, and then extending them to more general graphs.
+In the rest of the chapter, we will often need to compare two graphs
+defined on the same vertex set $V = \setof{1,\ldots,n} = [n]$.
+
+We use $G_{i,j}$ to denote the unit weight graph on vertex set $[n]$
+consisting of a single edge between vertices $i$ and $j$.
+
+\begin{lemma}[The Path Inequality]
+  \label{lem:pathineq}
+\begin{align*}
+(n-1) \cdot P_n \succeq G_{1,n},
+\end{align*}
+\end{lemma}
+% The following very simple proof of this inequality was discovered by Sam Daitch.
+% \begin{lemma}
+% \begin{align*}
+% (n-1) \cdot P_n \succeq G_{1,n}.
+% \end{align*}
+% \end{lemma}
+\begin{proof}
+
+We want to show that for every $\xx \in \R^n$,
+\begin{align*}
+(n-1) \cdot \sum_{i=1}^{n-1} ( \xx(i+1) - \xx(i) )^2 \geq ( \xx(n) - \xx(1) )^2.
+\end{align*}
+For $i \in [n-1]$, set
+\begin{align*}
+\DDelta (i) = \xx(i+1) - \xx(i).
+\end{align*}
+The inequality we want to prove then becomes
+\begin{align*}
+(n-1) \sum_{i=1}^{n-1} ( \DDelta(i) )^2 \geq \left( \sum_{i=1}^{n-1} \DDelta (i)  \right)^2.
+\end{align*}
+But, this is immediate from the Cauchy-Schwarz inequality
+$\aa^{\trp}\bb \leq \norm{\aa}_2\norm{\bb}_2$:
+\begin{align*}
+(n-1) \sum_{i=1}^{n-1} ( \DDelta (i) )^2
+= & ~ \| \vecone_{n-1} \|^2 \cdot \| \DDelta \|^2 \\
+= & ~ ( \| \vecone_{n-1} \| \cdot \| \DDelta \| )^2 \\
+\geq & ~  ( \vecone^\top_{n-1} \DDelta )^2  \\
+= & ~ (  \sum_{i=1}^{n-1} \DDelta(i) )^2
+\end{align*}
+\end{proof}
+% \Zhao{We skip Lemma 4.6.2}
+
+\subsection{Lower Bounding $\lambda_2$ of a Path Graph}
+
+We will now use Lemma~\ref{lem:pathineq} to prove a lower bound on $\lambda_2(\LL_{P_n})$.
+% I'll now demonstrate the power of Lemma 4.6.1 by using it to prove a lower bound on $\lambda_2 (P_n)$ that will be very close to the upper bound we obtained from the test vector.
+% To prove a lower bound on $\lambda_2 (P_n)$, we
+Our strategy will be to prove that the path $P_n$ is at least some multiple of the
+complete graph $K_n$, measured by the Loewner order, i.e. $K_n \preceq
+f(n) P_n$ for some function $f: \N \to \R$.
+We can combine this with our observation earlier that $\lambda_2 (\LL_{K_n}) = n$ to show that
+\begin{align}
+  \label{eq:pathtocompleteeig}
+f(n) \lambda_2(\LL_{P_n}) \geq \lambda_2(\LL_{K_n}) = n,
+\end{align}
+and this will give our lower bound on $\lambda_2(\LL_{P_n}).$
+% will prove that some multiple of the path is at least the complete
+% graph. To this end, write
+When establishing the inequality between $P_n$ and $K_n$, we can treat
+each edge of the complete graph separately, by first noting that
+\begin{align*}
+\LL_{K_n} = \sum_{i < j} \LL_{G_{i,j}}
+\end{align*}
+For every edge $(i,j)$ in the complete graph, we apply the Path
+Inequality, Lemma~\ref{lem:pathineq}:
+\begin{align*}
+  \label{eq:1}
+G_{i,j}
+\preceq & ~ (j-i) \sum_{k=i}^{j-1} G_{k,k+1} \\
+\preceq & ~ (j-i) P_n
+\end{align*}
+This inequality says that $G_{i,j}$ is at most $(j-i)$ times the part of the path connecting $i$ to $j$, and that this part of the path is less than the whole.
+
+Summing inequality (4.3) over all edges $(i,j) \in K_n$ gives
+\begin{align*}
+K_n = \sum_{i < j} G_{i,j} \preceq \sum_{i < j}  (j-i)P_n.
+\end{align*}
+To finish the proof, we compute
+\begin{align*}
+\sum_{i < j}  (j-i) \leq \sum_{i < j}  n \leq n^3
+\end{align*}
+
+So
+\begin{align*}
+L_{K_n} \preceq n^3 \cdot L_{P_n}.
+\end{align*}
+
+Plugging this into Equation~\eqref{eq:pathtocompleteeig}
+we obtain
+\begin{align*}
+\frac{1}{ n^2 } \leq \lambda_2 (P_n).
+\end{align*}
+This only differs from our test vector-based upper bound in
+Equation~\eqref{eq:testvectorbounds} by a factor 12.
+
+We could make this consirably tigher by being more careful about the sums.
+
+\subsection{Laplacian Eigenvalues of the Complete Binary Tree}
+
+Let's do the same analysis with the complete binary tree with unit
+weight edges on $n =
+2^{d+1}-1$ vertices, which we
+denote by $T_d$.
+
+$T_d$ is the balanced binary tree on this many vertices, i.e. it
+consists of a root node, which has two children, each of those
+children have two children and so on until we reach a depth of $d$
+from the root, at which point the child vertices have no more
+children.
+A simple induction shows that indeed $n = 2^{d+1}-1$.
+
+We can also describe the edge set by saying that each node $i$ has
+edges to its children $2i$ and $2i+1$ whenever the node labels do not
+exceed $n$.
+We emphasize that we still think of the graph as undirected.
+
+
+\paragraph{The largest eigenvalue.}
+We'll start by above bounding $\lambda_n(\LL_{T_d})$ using a test
+vector.
+
+We let $\xx(i) = 0$ for all nodes that have a child node, and $\xx(i)
+= -1$ for even-numbered leaf nodes and $\xx(i) = +1$ for odd-numbered
+leaf nodes.
+Note that there are $(n+1)/2$ leaf nodes, and every leaf node has a
+single edge, connecting it to a parent with value $0$.
+Thus
+\begin{align}
+\lambda_n(\LL) = \max_{ \substack{ \vv \neq \veczero} } \frac{
+  \vv^\top \LL \vv}{ \vv^\top \vv}
+  \geq
+  \frac{\xx^\top \LL \xx}
+  { \xx^\top \xx}
+  =
+  \frac{ (n+1)/2 }{ (n+1)/2 }
+  = 1
+  .
+\end{align}
+Meanwhile, every vertex has degree at most 3, so by
+Claim~\ref{clm:lambdamaxfromeig}, $\lambda_n(\LL) \leq 6$.
+So we can bound the largest eigenvalue above and below by constant.
+
+\paragraph{$\lambda_2$ and diameter in any graph.}
+The following lemma gives a simple lower bound on $\lambda_2$ for any
+graph.
+\begin{lemma}
+  \label{lem:lambda2diam}
+  For any unit weight graph $G$ with diameter $D$,
+  \[
+    \lambda_2(\LL_G) \geq \frac{1}{nD}.
+    \]
+\end{lemma}
+\begin{proof}
+  We will again prove a lower bound comparing $G$ to the complete
+  graph. For each edge $(i,j) \in K_n$, let $G^{i,j}$ denote a
+  shortest path in $G$ from $i$ to $j$. This path will have length at most $D$. So, we have
+\begin{align*}
+K_n
+= & ~ \sum_{i < j} G_{i,j} \\
+\preceq & ~ \sum_{i < j} D G^{i,j} \\
+\preceq & ~ \sum_{i < j} D G \\
+\preceq & ~ n^2 D G.
+\end{align*}
+So, we obtain the bound
+\begin{align*}
+n^2D \lambda_{2} (G) \geq n,
+\end{align*}
+which implies our desired statement.
+\end{proof}
+
+\paragraph{$\lambda_2$ in a tree.}
+Since a complete binary tree $T_d$ has diameter $2d \leq 2\log_2(n)$,
+by Lemma~\ref{lem:lambda2diam}, $\lambda_2(\LL_{T_d}) \geq
+\frac{1}{2n\log_2(n)}$.
+
+Let us give an upper bound on $\lambda_2$ of the tree using a test
+vector.
+Let $\xx \in \R^v$ have $\xx(1) = 0$ and $\xx(i) = -1$ for $i$ in the left
+subtree and $\xx(i) = +1$ in the right subtree.
+Then
+\begin{align*}
+\lambda_2(\LL_{T_d}) = \min_{ \substack{ \vv \neq \veczero \\ \vv^\top
+  \vecone = 0} } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}
+  \leq
+  \frac{ \xx^\top \LL \xx}{ \xx^\top \xx}
+  =
+  \frac{2}{n-1}.
+\end{align*}
+So, we have shown
+$\frac{1}{2n\log_2(n)} \leq \lambda_2(\LL_{T_d})
+\leq \frac{2}{n-1}$, and unlike the previous examples, the gap is more
+than a constant.
+
+In the exercises for Week 3, I will ask you to improve the lower bound to
+$1/(cn)$ for some constant $c$.
+
+
+
+% \FloatBarrier
+% \bibliographystyle{alpha}
+% \bibliography{refs}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% TeX-engine: luatex
+%%% End:

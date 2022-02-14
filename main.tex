@@ -1,0 +1,170 @@
+\documentclass[12pt,a4paper,openany]{book}
+\input{defs}
+\input{layout-defs}
+\usepackage{chapterbib}
+\usepackage{mdframed}
+
+\newcommand\gap{\text{gap}}
+
+\usepackage{cleveref}
+
+\newcommand{\Zhao}[1]{{\color{red} Zhao: #1}}
+\newcommand{\Hongjie}[1]{{\color{red} Hongjie: #1}}
+\newcommand\symset{S}
+\newcommand\psdset{S_+}
+\newcommand\pdset{S_{++}}
+
+\newcommand\symsetn{\symset^n}
+\newcommand\psdsetn{\psdset^n}
+\newcommand\pdsetn{\pdset^n}
+
+\newcommand{\vcliq}[2]{\textsc{Clique}\!\left({#1,#2}\right)}
+\newcommand{\vstar}[2]{\textsc{Star}\!\left({#1,#2}\right)}
+\newcommand{\vcliqsp}[2]{\textsc{CliqueSample}\!\left({#1,#2}\right)}
+%%% layout and code
+\usepackage{float}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+%\usepackage{float}
+\usepackage[ruled,vlined]{algorithm2e}
+\SetKwBlock{Repeat}{repeat}{}
+%%% for this lecture
+% \newtheorem{theorem}{Definition}
+\interfootnotelinepenalty=10000
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+%%% for this lecture
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+\newcommand\st{~\mathrm{s.t.}~}
+\newcommand\ttau{\boldsymbol{\tau}}
+\newcommand{\df}{\mathrm{d}}
+\def\hcalE{\hat{\mathcal{E}}}
+
+%\allowdisplaybreaks
+
+%for the title
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+%\usepackage[colorinlistoftodos]{todonotes}
+
+%PAGE STYLE
+\pagestyle{plain}
+%\pagenumbering{roman}
+
+%BEGIN DOCUMENT
+\begin{document}
+
+%
+% Front matter
+%
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+{\center
+
+{\Large ETH Zurich}\\[1.5cm]
+\HRule \\[0.4cm]
+{ \huge \bfseries Advanced Graph Algorithms and \\ Optimization}\\[0.4cm] % Title
+\HRule \\[1.5cm]
+
+{\LARGE Rasmus Kyng \& Maximilian Probst Gutenberg}\\[2cm]
+
+
+{\Large Spring 2022}\\[2cm] % Date
+
+%\includegraphics{logo.png}\\[1cm] % Include a department/university logo
+}
+\vfill
+
+
+
+
+\end{titlepage}
+
+These notes will be updated throughout the course.
+They are likely to contain typos, and they may have mistakes or
+lack clarity in places. Feedback and comments are 
+welcome. Please send to kyng@inf.ethz.ch or submit a pull request at
+\url{https://github.com/rjkyng/agao21_script}.
+
+We want to thank scribes from the 2020 edition of the course who
+contributed to these notes: Hongjie
+Chen, Meher Chaitanya, Timon Knigge, and Tim Taubner -- and we're
+grateful to all the readers who've submitted corrections, including
+Martin Kucera, Alejandro Cassis, and Luke Volpatti.
+
+\emph{A important note:} If you're a student browsing these notes to
+decide whether to take this course, please note that the current notes
+are incomplete. We will release Parts II and III later in the
+semester.
+You may wish to take a look at last year's notes for a sense of the
+what the rest of the course will look like. You can find them here:
+\begin{quote}
+  \url{https://kyng.inf.ethz.ch/courses/AGAO21/agao21_script.pdf}
+\end{quote}
+There will, however, be some changes to the content compared to last year.
+
+\newpage
+
+\tableofcontents
+
+
+
+
+% \part{Introduction}
+
+\label{part:intro}
+\input{lecture_intro}
+
+\part{Introduction to Convex Optimization}
+\label{part:convex}
+\input{lecture_convOptAndLinAlg}
+\input{lecture_convHessianAndGDwAcc}
+
+
+\part{Spectral Graph Theory}
+\label{part:sg}
+\input{lecture_sgIntro}
+\input{lecture_sgMore}
+\input{lecture_CheegerAndExpanders}
+\input{lecture_RandomWalks}
+
+\input{lecture_pinvAndReff}
+\input{lecture_gaussianElim}
+\input{lecture_randMatAndSparsification}
+\input{lecture_solvingLaplacians}
+
+\part{Combinatorial Graph Algorithms}
+\label{part:combinatorial}
+More to come here.
+% \input{lecture10_mod}
+% \input{lecture11_mod}
+% \input{lecture_DynamicTrees}
+% \input{lecture_CutMatching}
+
+
+\part{Further Topics}
+\label{part:more}
+Yet more topics will follow here.
+% \input{lecture12_mod}
+% \input{lecture13_mod}
+% \input{lecture14}
+% \input{lecture_DistanceOracles}
+
+\bibliographystyle{alpha}
+\bibliography{refs}
+
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

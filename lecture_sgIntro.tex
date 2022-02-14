@@ -1,0 +1,581 @@
+% \documentclass[draft,11pt]{article}
+%\documentclass[11pt]{article}
+
+\chapter{Introduction to Spectral Graph Theory}
+
+%\allowdisplaybreaks
+
+%%% for this lecture
+%\newcommand\gap{\text{gap}}
+%\newcommand{\Zhao}[1]{{\color{red} Zhao: #1}}
+
+%\begin{document}
+\sloppy
+%\lecture{4 --- Wednesday, March 11th}
+%{Spring 2020}{Rasmus Kyng}{Introduction to Spectral Graph Theory}
+
+In this chapter, we will study graphs through linear algebra. This
+approach is known as Spectral Graph Theory and turns out to be
+surprisingly powerful.
+An in-depth treatment of many topics in this area can be found in \cite{S19}.
+
+\section{Recap: Incidence and Adjacency Matrices, the Laplacian
+  Matrix and Electrical Energy}
+
+In Chapter~\ref{cha:intro}, we looked at undirected graphs and we introduce the
+incidence matrix and the Laplacian of the graph. Let us recall these.
+
+We consider an undirected weighted graph $G=(V, E, \ww)$, with
+$n=\sizeof{V}$ vertices and $m = \sizeof{E}$ edges, where $\ww \in
+\R_+^E$ assigns positive weight for every edge.
+Let's assume $G$ is connected.
+
+To introduce the \emph{edge-vertex incidence matrix} of the graph,
+we first have to associate an arbitrary direction to every edge.
+We then let
+$\BB \in \R^{V \times E}$.
+\[
+  \BB(v,e) =
+  \begin{cases}
+    1 & \text{ if } e = (u,v) \\
+    -1 &\text{ if } e = (v,u) \\
+    0 &\text{ o.w.}
+  \end{cases}
+\]
+The edge directions are only there to help us track the meaning of signs of
+quantities defined on edges: The math we do should not depend on the
+choice of sign.
+
+Let $\WW \in \R^{E \times E}$ be the diagonal matrix given by $\WW =
+\diag(\ww)$, i.e $\WW(e,e) = \ww(e)$.
+We define the Laplacian of the graph as $\LL = \BB\WW\BB^{\trp}$.
+Note that in the first chapter, we defined the Laplacian as
+$\BB\RR^{-1}\BB^{\trp}$,
+where $\RR$ is the diagonal matrix with edge resistances on the
+diagonal.
+We want to think of high \emph{weight} on an edge as expressing that two
+vertices are highly connected, whereas we think of high resistance on
+an edge as expressing that the two vertices are poorly connected, so
+we let $\ww(e) = 1/\RR(e,e)$.
+
+The weighted adjacency matrix $\AA \in \R^{V \times V}$ of a graph is
+given by
+\[
+  \AA(u,v) =
+  \begin{cases}
+    \ww(u,v) & \text{ if } \setof{u,v} \in E \\
+    0  & \text{ otherwise. }
+  \end{cases}
+\]
+Note that we treat the edges as undirected here, so $\AA^{\trp} = \AA$.
+The weighted degree of a vertex is defined as $\dd(v) = \sum_{\setof{u,v}
+  \in E} w(u,v)$. Again we treat the edges as undirected.
+Let $\DD = \diag(\dd)$ be the diagonal matrix in $\R^{V \times V}$
+with weighted degrees on the diagonal.
+
+In Problem Set 1, you showed that $\LL = \DD - \AA$, and that for $\xx
+\in \R^V$,
+\[
+\xx^{\trp} \LL \xx = \sum_{\setof{a,b} \in E} \ww(a,b) (\xx(a) - \xx(b))^2.
+  \]
+
+Now we can express the net flow constraint that $\ff$ routes $\dd$ by
+\[
+  \BB \ff = \dd
+  .
+\]
+This is also called a conservation constraint. In our examples so far,
+we have $\dd(s) = -1$, $\dd(t) = 1$ and $\dd(u) = 0$ for all $u\in V\setminus\setof{s,t}$.
+
+If we let $\RR = \diag_{e \in E} \rr(e)$
+then Ohm's law tells us that electrical voltages $\xx$ will induce an
+electrical flow $\ff = \RR^{-1}\BB^{\trp} \xx$.
+We defined the electrical energy of a flow $\ff \in \R^E$ to be
+\[
+  \energy(\ff) = \sum_e \rr(e) \ff(e)^2 = \ff^{\trp} \RR \ff.
+\]
+And, from Ohm's Law, we can then see that
+\[
+ \energy(\ff) = \ff^{\trp} \RR \ff = \xx^{\trp} \LL \xx.
+\]
+Hence, define the electrical energy associated with a set of voltages
+to be
+\[
+ \energy(\xx) = \xx^{\trp} \LL \xx.
+\]
+\paragraph{The Courant-Fisher Theorem.} Let us also recall the
+Courant-Fischer theorem, which we proved in Chapter 3 (Theorem \ref{thm:courant-fischer}).
+\begin{theorem}[The Courant-Fischer Theorem]
+  \label{thm:courant-fischer}
+  Let $\AA$ be a symmetric matrix in $\R^{n\times n}$, with
+  eigenvalues $\lambda_1\leq \lambda_2 \leq \ldots \leq \lambda_n$.
+  Then
+  \begin{enumerate}
+  \item
+  \label{thm:courant-fischer:minmax}
+    \[
+    \lambda_i = \min_{
+      \substack{
+        \mathrm{subspace~} W \subseteq \R^n
+        \\
+        \dim{W} = i
+      }
+    }
+    \max_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+  \]
+\item
+  \label{thm:courant-fischer:maxmin}
+    \[
+    \lambda_i
+    =
+    \max_{
+      \substack{
+        \mathrm{subspace~} W \subseteq \R^n
+        \\
+        \dim{W} = n+1-i
+      }
+    }
+    \min_{
+      \xx \in W, \xx \neq \veczero
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+    \]
+  \end{enumerate}
+\end{theorem}
+
+In fact, from our proof of the Courant-Fischer theorem in Chapter 3,
+we can also extract a slightly different statement: 
+
+\begin{theorem}[The Courant-Fischer Theorem, eigenbasis version]
+  \label{thm:courant-fischer-eigvec}
+  Let $\AA$ be a symmetric matrix in $\R^{n\times n}$, with
+  eigenvalues $\lambda_1\leq \lambda_2 \leq \ldots \leq \lambda_n$,
+  and corresponding eigenvectors $\xx_1, \xx_2, \ldots, \xx_n$ which
+  form an othernormal basis.
+  Then
+  \begin{enumerate}
+  \item
+  \label{thm:courant-fischer-eigvec:minmax}
+    \[
+    \lambda_i =
+    \min_{
+      \substack{ \xx \perp \xx_1, \ldots \xx_{i-1}
+        \\ \xx \neq \veczero}
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+  \]
+\item
+  \label{thm:courant-fischer2:maxmin}
+    \[
+    \lambda_i =
+    \max_{
+      \substack{  \xx \perp \xx_{i+1}, \ldots \xx_{n}
+        \\ \xx \neq \veczero}
+    }
+    \frac{\xx^\trp \AA\xx}{\xx^\trp\xx}
+    \]
+  \end{enumerate}
+\end{theorem}
+
+Of course, we also have $\lambda_i(\AA) = \frac{\xx_i ^\trp \AA \xx_i
+}{\xx_i^\trp\xx_i}$.
+\section{Understanding Eigenvalues of the Laplacian}
+We would like to understand the eigenvalues of the Laplacian matrix of
+a graph.
+
+But first, why should we care? It turns out that Laplacian eigenvalues can help
+us understand many properties of a graph.
+But we are going to start off with simple motivating observation: Electrical
+voltages $\xx \in \R^V$ consume electrical energy $\energy(\xx) =
+\xx^{\trp} \LL \xx$.
+This means that by the Courant-Fischer Theorem
+\[
+  \energy(\xx) =
+  \xx^{\trp} \LL \xx \leq \lambda_n(L)  \xx^{\trp} \xx
+\]
+And, for any voltages $\xx \perp \vecone$, 
+\[
+  \energy(\xx) =
+  \xx^{\trp} \LL \xx \geq \lambda_2(L)  \xx^{\trp} \xx.
+\]
+Thus, we can use the eigenvalues to give upper and lower bounds on how
+much electrical energy will be consumed by the flow induced by $\xx$,
+in terms compared to $\xx^{\trp} \xx = \norm{\xx}_2^2$.
+
+In a couple of chapters, we will also prove the following claim, which
+shows that the Laplacian eigenvalues can directly tell us about the
+electrical energy that is required to route a given demand.
+
+\begin{claim}
+  Given a demand vector
+  $\dd \in \R^V$ such that $\dd \perp \vecone$,
+  the electrical voltages $\xx$ that route $\dd$ satisfy $\LL \xx =
+  \dd$ and the electrical energy of these voltages satifies
+  \[
+\frac{\norm{\dd}_2^2}{\lambda_n} \leq \energy(\xx) \leq \frac{\norm{\dd}_2^2}{\lambda_2}
+    \]
+\end{claim}
+
+
+\paragraph{Eigenvalues of the Laplacian of a Complete Graph.}
+To get a sense of how Laplacian eigenvalues behave, let us start by considering the $n$ vertex complete graph with unit weights,
+which we denote by $K_n$.
+The adjacency matrix of $K_n$ is $\AA = \vecone \vecone^\trp - \II$,
+since it has ones everywhere, except for the diagonal, where entries
+are zero.
+The degree matrix $\DD = (n-1) \II$.
+Thus the Laplacian is $\LL =  \DD - \AA = n\II - \vecone
+\vecone^\trp$.
+
+Thus for any $\yy \perp \vecone$, we have
+$\yy^{\trp} \LL \yy = n \yy^{\trp} \yy - (\vecone^{\trp} \yy)^2 = n \yy^{\trp} \yy$.
+
+From this, we can conclude that any $\yy \perp \vecone$ is an
+eigenvector of eigenvalue $n$, and that all $\lambda_2 = \lambda_3 =
+\ldots = \lambda_n = n$.
+
+Next, let us try to understand $\lambda_2$ and $\lambda_n$ for
+$P_n$, the $n$ vertex path graph with unit weight edges.
+I.e. the graph has edges $E = \setof{ \setof{i,i+1}  \text{ for } i = 1 \text{ to
+  } (n-1) }$.
+
+This is in a sense the least well-connected unit weight graph on $n$
+vertices, whereas $K_n$ is the most well-connected.
+
+\subsection{Test Vector Bounds on $\lambda_2$ and $\lambda_n$}
+We can use the eigenbasis version of the Courant-Fisher theorem to observe
+that the second-smallest eigenvalue of the Laplacian is given by
+\begin{align}
+  \label{eq:lambda2bymin}
+\lambda_2(\LL) = \min_{ \substack{ \xx \neq \veczero \\ \xx^\top \vecone = 0} } \frac{ \xx^\top \LL \xx}{ \xx^\top \xx}.
+\end{align}
+
+We can get a better understanding of this particular case through a couple of simple
+observations. Suppose $\xx = \yy + \alpha \vecone$, where $\yy \perp
+\vecone$.
+Then $\xx^{\trp} \LL \xx = \yy^{\trp} \LL \yy$, and $\norm{\xx}_2^2 =
+\norm{\yy}^2 + \alpha^2 \norm{\vecone}^2$.
+So for any given vector, you can increase the value of $\frac{
+  \xx^\top \LL \xx}{ \xx^\top \xx}$, by instead replacing $\xx$ with
+the component orthogonal to $\vecone$, which we denoted by $\yy$.
+
+We can conclude from Equation~\eqref{eq:lambda2bymin} that for \emph{any} vector $\yy \perp \vecone$,
+\begin{align*}
+\lambda_2 \leq \frac{ \yy^\trp \LL \yy}{ \yy^\trp \yy}
+\end{align*}
+When we use a vector $\yy$ in this way to prove a bound on an eigenvalue, we call it a \emph{test vector}.
+
+Now, we'll use a test vector to give an upper bound on $\lambda_2(\LL_{P_n})$.
+Let $\xx \in \R^V$ be given by $\xx ( i ) = ( n + 1 ) - 2 i$, for $i
+\in [n]$. This vector satisfies $\xx \bot \vecone$.
+We picked this because we wanted a sequence of values growing linearly along
+the path, while also making sure that the vector is orthogonal to
+$\vecone$.
+Now
+\begin{align*}
+\lambda_2(\LL_{P_n})
+\leq & ~ \frac{ \sum_{i \in [n-1]} ( \xx(i) - \xx(i+1) )^2  }{ \sum_{i=1}^n \xx(i)^2 } \\
+= & ~ \frac{ \sum_{i=1}^{n-1} 2^2 }{ \sum_{i=1}^n ( n + 1 - 2 i )^2 } \\
+= & ~ \frac{ 4 ( n - 1 ) }{ ( n + 1 ) n ( n - 1 ) / 3 } \\
+= & ~ \frac{ 12 } { n ( n + 1 ) } \leq \frac{ 12 } { n^2 }.
+\end{align*}
+
+Later, we will prove a lower bound that shows this value is right up
+to a constant factor.
+But the test vector approach based on the Courant-Fischer theorem
+doesn't immediately work
+when we want to prove lower bounds on $\lambda_2(\LL)$.
+
+We can see from either version of the Courant-Fischer theorem that
+\begin{align}
+  \label{eq:lambdanbymax}
+\lambda_n(\LL) = \max_{ \substack{ \vv \neq \veczero} } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}.
+\end{align}
+Thus for \emph{any} vector $\yy \neq 0$,
+\begin{align*}
+\lambda_n \geq \frac{ \yy^\trp \LL \yy}{ \yy^\trp \yy}.
+\end{align*}
+This means we can get a test vector-based lower bound on $\lambda_n$.
+Let us apply this to the Laplacian of $P_n$.
+We'll try the vector $\xx \in \R^V$ given by $\xx ( 1 ) = -1$,
+and $\xx(n) = 1$ and $\xx(i) = 0$ for $i \neq 0,1$.
+
+Here we get
+\begin{align*}
+\lambda_n(\LL_{P_n}) \geq \frac{ \xx^\trp \LL \xx}{ \xx^\trp \xx} = \frac{2}{2} = 1.
+\end{align*}
+
+Again, it's not clear how to use the Courant-Fischer theorem to prove
+an upper bound on $\lambda_n(\LL) $.
+But, later we'll see how to prove an upper that shows that
+for $P_n$, the lower bound we obtained is right up to constant factors.
+
+% The Courant-Fischer theorem is not as helpful when we want to prove lower bounds on $\lambda_2$. To prove lower bounds, we need the form with a maximum on the outside, which gives
+% \begin{align*}
+% \lambda_2 \geq \max_{S : \dim{S} = n - 1 } \min_{ \vv\in S } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}
+% \end{align*}
+% This is not too helpful, as it is difficult to prove lower bounds on
+% \begin{align*}
+% \min_{ \vv\in S } \frac{ \vv^\top \LL \vv}{ \vv^\top \vv}
+% \end{align*}
+% over a space $S$ of large dimension. We need another technique.
+
+% \subsection{Graphic Inequalities}
+% I begin by recalling an extremely useful piece of notation that is used in the Optimization community. For a symmetric matrix ${\bf A}$, we write
+% \begin{align*}
+% {\bf A} \succeq 0
+% \end{align*}
+% if ${\bf A}$ is positive semidefinite. That is, if all of the eigenvalues of ${\bf A}$ are nonnegative, which is equivalent to
+% \begin{align*}
+% \vv^\top {\bf A} \vv\geq 0,
+% \end{align*}
+% for all $\vv$. We similarly write
+% \begin{align*}
+% {\bf A} \succeq {\bf B}
+% \end{align*}
+% if
+% \begin{align*}
+% {\bf A} - {\bf B} \succeq 0
+% \end{align*}
+% which is equivalent to
+% \begin{align*}
+% \vv^\top {\bf A} \vv\geq \vv^\top {\bf B} \vv
+% \end{align*}
+% for all $\vv$.
+
+% The relation $\preceq$ is an example of a partial order. It applies to some pairs of symmetric matrices, while others are incomparable. But, for all pairs to which it does apply, it acts like an order. For example, we have
+% \begin{align*}
+% {\bf A} \succeq {\bf B}, \mathrm{~and~} {\bf B} \succeq {\bf C} \mathrm{~implies~} {\bf A} \succeq {\bf C},
+% \end{align*}
+% and
+% \begin{align*}
+% {\bf A} \succeq {\bf B} \mathrm{~implies~} {\bf A} + {\bf C} \succeq {\bf B} + {\bf C},
+% \end{align*}
+% for symmetric matrices ${\cal A}$, ${\cal B}$ and ${\cal C}$.
+
+% I find it convenient to overload this notation by defining it for graphs as well. Thus, I'll write
+% \begin{align*}
+% G \succeq H
+% \end{align*}
+% if $\LL_{G} \succeq \LL_H$.
+
+% For example, if $G = (V,E)$ is a graph and $H = (V,F)$ is a subgraph of $G$, then
+% \begin{align*}
+% \LL_G \succeq \LL_H.
+% \end{align*}
+
+% To see this, recall the Laplacian quadratic form:
+% \begin{align*}
+% \xx^\top \LL_G \xx = \sum_{ (u,v) \in E } w_{u,v} ( \xx(u) - \xx(v) )^2.
+% \end{align*}
+% It is clear that dropping edges can only decrease the value of the quadratic form. The same holds for decreasing the weights of edges.
+
+% This notation is most powerful when we consider some multiple of a graph. Thus, I could write
+% \begin{align*}
+% G \succeq c \cdot H, \mathrm{~for~some~} c > 0.
+% \end{align*}
+% What is $c \cdot H$? It is the same graph as $H$, but the weight of every edge is multiplied by $c$.
+
+% Using the Courant-Fischer Theorem, we can prove
+% \begin{lemma}
+% If $G$ and $H$ are graphs such that
+% \begin{align*}
+%  G \succeq c \cdot H,
+% \end{align*}
+% then
+% \begin{align*}
+% \lambda_k (G) \geq c \cdot \lambda_k(H), \mathrm{~for~all~} k.
+% \end{align*}
+% \end{lemma}
+% \begin{proof}
+% The Courant-Fischer Theorem tells us that
+% \begin{align*}
+% \lambda_k (G)
+% = & ~ \min_{ S \subseteq \R^n, \dim{S} = k } \max_{ \xx \in S }
+%  \frac{ \xx^\top \LL_G \xx }{ \xx^\top \xx } \\
+% \geq & ~ c \dot \min_{ S \subseteq \R^n, \dim{S} = k } \max_{ \xx \in S } \frac{ \xx^\top L_H \xx }{ \xx^\top \xx } \\
+% = & ~ c \cdot \lambda_k (H).
+% \end{align*}
+% \end{proof}
+
+% \begin{corollary}
+% Let $G$ be a graph and let $H$ be obtained by either adding an edge to $G$ or increasing the weight of an edge in $G$. Then, for all $i$,
+% \begin{align*}
+% \lambda_i (G) \leq \lambda_i (H).
+% \end{align*}
+% \end{corollary}
+
+
+% \subsection{Approximations of Graphs}
+% An idea that we will use in later lectures is that one graph approximations another if their Laplacian quadratic forms are similar. For example, we will say that $H$ is a $c$-approximation of $G$ if
+% \begin{align*}
+% c \cdot H \succeq G \succeq H /c.
+% \end{align*}
+% Surprising approximations exist.
+
+% For example, expander graphs are very sparse approximations of the complete graph. For example, the following is known
+% \begin{theorem}
+% For every $\epsilon > 0$, there exists a $d > 0$ such that for all sufficiently large $n$ there is a $d$-regular graph $G_n$ that is $(1+\epsilon)$-approximation of $K_n$.
+% \end{theorem}
+
+% These graphs have many fewer edges than the complete graphs!
+% In a latter lecture we will also prove that every graph can be well-approximated by a sparse graph.
+
+
+% \subsection{The path inequality}
+
+% By now you should be wondering, ``how do we prove that $G \succeq c \cdot H$ for some graph $G$ and $H$?'' Not too many ways are known. We'll do it by proving some inequalities of this form for some of the simplest graphs, and then extending them to more general graphs.
+
+% For example, we will
+% \begin{align*}
+% (n-1) \cdot P_n \succeq G_{1,n},
+% \end{align*}
+% where $P_n$ is the path from vertex $1$ to vertex $n$, and $G_{1,n}$ is the graph with just the edge $(1,n)$. All of these edges are unweighted.
+
+% The following very simple proof of this inequality was discovered by Sam Daitch.
+% \begin{lemma}
+% \begin{align*}
+% (n-1) \cdot P_n \succeq G_{1,n}.
+% \end{align*}
+% \end{lemma}
+% \begin{proof}
+
+% We need to show that for every $x \in \in \R^n$,
+% \begin{align*}
+% (n-1) \cdot \sum_{i=1}^{n-1} ( x(i+1) - x(i) )^2 \geq ( x(n) - x(1) )^2.
+% \end{align*}
+% For $i \in [n-1]$, set
+% \begin{align*}
+% \Delta (i) = x(i+1) - x(i).
+% \end{align*}
+% The inequality we need to prove then becomes
+% \begin{align*}
+% (n-1) \sum_{i=1}^{n-1} ( \Delta(i) )^2 \geq \left( \sum_{i=1}^{n-1} \Delta (i)  \right)^2.
+% \end{align*}
+% But, this is just the Cauchy-Schwartz inequality. I'll remind you that Cauchy-Schwartz just follows from the fact that the inner product of two vectors is at most the product of their norms:
+% \begin{align*}
+% (n-1) \sum_{i=1}^{n-1} ( \Delta (i) )^2
+% = & ~ \| \vecone_{n-1} \|^2 \cdot \| \Delta \|^2 \\
+% = & ~ ( \| \vecone_{n-1} \| \cdot \| \Delta \|^2 )^2 \\
+% \geq & ~  ( \vecone^\top_{n-1} \Delta )^2  \\
+% = & ~ (  \sum_{i=1}^{n-1} \Delta(i) )^2
+% \end{align*}
+
+% \end{proof}
+
+% \Zhao{We skip Lemma 4.6.2}
+
+% \subsubsection{Bounding $\lambda_2$ of a Path Graph}
+
+% I'll now demonstrate the power of Lemma 4.6.1 by using it to prove a lower bound on $\lambda_2 (P_n)$ that will be very close to the upper bound we obtained from the test vector.
+
+% To prove a lower bound on $\lambda_2 (P_n)$, we will prove that some multiple of the path is at least the complete graph. To this end, write
+% \begin{align*}
+% L_{K_n} = \sum_{i < j} L_{G_{i,j}}
+% \end{align*}
+% and recall that
+% \begin{align*}
+% \lambda_2 (K_n) = n.
+% \end{align*}
+
+% For every edge $(i,j)$ in the complete graph, we apply the only inequality available in the path :
+% \begin{align*}
+% G_{i,j}
+% \preceq & ~ (j-i) \sum_{k=i}^{j-1} G_{k,k+1} \\
+% \preceq & ~ (j-i) P_n.
+% \end{align*}
+% This inequality says that $G_{i,j}$ is at most $(j-i)$ times the part of the path connecting $i$ to $j$, and that this part of the path is less than the whole.
+
+% Summing inequality (4.3) over all edges $(i,j) \in K_n$ gives
+% \begin{align*}
+% K_n = \sum_{i < j} G_{i,j} \preceq \sum_{i,j} (j-i)P_n.
+% \end{align*}
+% To finish the proof, we compute
+% \begin{align*}
+% \sum_{1 \leq i < j \leq n} (j-i)
+% = & ~ \sum_{k=1}^{n-1} k (n-k) \\
+% = & ~ n (n+1) (n-1)/6.
+% \end{align*}
+
+% So
+% \begin{align*}
+% L_{K_n} \preceq \frac{ n(n+1) (n-1) }{6} \cdot L_{P_n}.
+% \end{align*}
+
+% Applying Lemma 4.4.1, we obtain
+% \begin{align*}
+% \frac{6}{ (n+1)(n-1) } \leq \lambda_2 (P_n).
+% \end{align*}
+% This only differs from the upper bound (4.1) by a factor of 2. \Zhao{will fix (4.1) later.}
+
+
+
+
+% \subsection{The complete binary tree}
+
+% Let's do the same analysis with the complete binary tree.
+
+% One way of understanding the complete binary tree of depth $d+1$ is to identify the vertices of the tree strings over $\{0,1\}$ of length at most $d$. The root of the tree is the empty string. Every other node has one ancestor, which is obtained by removing the last character of its string, and two children, which are obtained by appending one character to its label.
+
+% Alternatively, you can describe it as the graph on $n = 2^{d+1} - 1$ nodes with edges of the form $(i,2i)$ and $(i,2i+1)$ for $i < n$.
+% We will name this graph $T_d$.
+
+% \Zhao{Let's ignore the picture for now.}
+
+% Let's first upper bound $\lambda_2 (T_d)$ by constructing a test vector $x$. Set $x(1) = 0$, $x(2) = 1$, and $x(3) = -1$. Then, for every vertex $u$ that we can reach from node $2$ without going through node $1$, we set $x(u) = 1$. For all the other nodes, we set $x(u) = -1$.
+
+% We then have
+% \begin{align*}
+% \lambda_2
+% \leq & ~ \frac{ \sum_{ (i,j) \in T_d } ( x_i - x_j )^2 } { \sum_i x_i^2 } \\
+% = & ~ \frac{ (x_1 - x_2)^2 + (x_1 - x_3)^2  }{ n - 1 } \\
+% = & ~ 2/ (n-1).
+% \end{align*}
+
+% We will again prove a lower bound comparing $T_d$ to the complete graph. For each edge $(i,j) \in K_n$, let $T_d^{i,j}$ denote the unique path in $T$ from $i$ to $j$. This path will have length at most $2d$. So, we have
+% \begin{align*}
+% K_n
+% = & ~ \sum_{i < j} G_{i,j} \\
+% \preceq & ~ \sum_{i < j} (2d) T_d^{i,j} \\
+% \preceq & ~ \sum_{i < j} (2 \log_2 n) T_d \\
+% = & ~ {n \choose 2} (2\log_2 n) T_d
+% \end{align*}
+% SO, we obtain the bound
+% \begin{align*}
+% {n \choose 2} \cdot (2 \log_2 n) \lambda_{2} (T_d) \geq n,
+% \end{align*}
+% which implies
+% \begin{align*}
+% \lambda_2 (T_d) \geq \frac{1}{ (n-1) \log_2 n }
+% \end{align*}
+% In the next problem set, I will ask you to improve this lower bound to $1/(cn)$ for some constant $c$.
+
+
+
+
+
+% \section{Graded HW notes}
+
+% \begin{itemize}
+% \item I'd like an exercise about applying accelerated gradient
+%   descent to
+% \end{itemize}
+
+
+%\FloatBarrier
+%\bibliographystyle{alpha}
+%\bibliography{refs}
+
+
+
+
+%\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% TeX-engine: luatex
+%%% End:
