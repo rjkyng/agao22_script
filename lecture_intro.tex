@@ -507,9 +507,8 @@ actual minimum congestion flow routing $\dd$.
 
 But what if we want $\epsilon$ to be very small, e.g. $1/m$? Then this running
 time isn't so good anymore.
-But, in this case, we can use another algorithm, that finds an optimal
-flow $\ff^*$ \emph{exactly}, in time\footnote{And there's even a paper on arXiv.org that brings this further
-  down to $m^{11/8} \log^{O(1)} n$.} $m^{10/7} \log^{O(1)} n $.
+But, in this case, we can use other algorithms that find flow $\ff^*$
+\emph{exactly}. Unfortunately, these algorithms take time roughly $m^{4/3+o(1)}$.
 
 Just as the electrical flow problem had a dual voltage problem, so
 maximum flow has a dual voltage problem, which is know as the
@@ -530,7 +529,8 @@ Then our problem becomes
                      &  \ff \geq \veczero.
 \end{align*}
 For this capacitated, directed maximum flow problem, our best
-algorithms run in about $O( m \sqrt{n} )$ time\footnote{Provided the
+algorithms run in about $O( m \sqrt{n} )$ time in dense graphs and $O(
+m^{1.483} )$ in dense graphs\footnote{Provided the
   capacities are integers satisfying a condition like $\cc \leq n^{100} \vecone$.}, even if we are willing to
 accept fairly low accuracy solution.
 If the capacities are allowed to be exponentially large, the best
