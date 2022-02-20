@@ -259,14 +259,15 @@ would call them ``power''.
 Now, another interesting question would seem to be: If we want to find
 a flow routing a certain demand $\dd$, how should have flow behave in
 order to minimize the the electrical energy spent routing the flow?
+The electrical energy of a flow vector $\ff$ is $\energy(\ff) \defeq \sum_e \rr(e) \ff(e)^2$.
 We can phrase this as an optimization problem:
 \begin{align*}
-  \min_{\ff \in \R^E} & \sum_e \rr(e) \ff(e)^2
+  \min_{\ff \in \R^E} \, & \energy(\ff)
   \\
   \textrm{s.t. } & \BB \ff = \dd .
 \end{align*}
 We call this problem \emph{electrical energy-minimizing flow}.
-It turns out, that the flow $\ff^*$ that minimizes the electrical
+As we will prove later, the flow $\ff^*$ that minimizes the electrical
 energy among all flows that satisfy $\BB \ff = \dd$ is precisely the
 electrical flow.
 
@@ -293,13 +294,13 @@ You will confirm this in Exercise 4.
 Based on our derivative condition for the optimum, we can also express the electrical voltages as the solution to
 an optimization problem, namely
 \begin{align*}
-\min_{\xx \in \R^V} & \frac{1}{2} \xx^{\trp} \LL \xx -
-\xx^{\trp}\dd
+\min_{\xx \in \R^V} & c(\xx)
 \end{align*}
 As you are probably aware, having the derivative of each coordinate equal zero is not a
 sufficient condition for being at the optimum of a
 function\footnote{Consider the function in one variable $c(x) =
   x^3$.}.
+
 It is also interesting to know whether \emph{all} solutions to $\LL
 \xx = \dd$ are in fact minimizers of $c$. The answer is
 yes, and will see some very general tools for proving statements like
@@ -323,13 +324,25 @@ Altogether, we can see that routing electrical current through a
 network of resistors leads to a \emph{pair} of optimization problems,
 let's call them $\ff^*$ and $\xx^*$,
 and that the solutions to the two problems are related, in our case
-through the equation $\ff^* = \RR^{-1}\BB^{\trp} \xx^*$.
-In Exercise 5, you will explore this relationship more.
-\\
+through the equation $\ff^* = \RR^{-1}\BB^{\trp} \xx^*$ (Ohm's Law).
+But, why and how are these two optimization problems related?
+
+Instead of minimizing $c(\xx)$, we can equivalently think about maximizing
+$-c(\xx)$, which gives the following optimization problem: $\max_{\xx \in \R^V} -c(\xx)$.
+In fact, as you will show in the exercises for Week 1,
+we have $\energy(\ff^*) = -c(\xx^*)$, so the
+minimum electrical energy is exactly the maximum value of
+$-\cc(\xx)$.
+More generally for \emph{any} flow that routes $\dd$ and \emph{any}
+voltages $\xx$, we have $\energy(\ff) \geq -c(\xx)$.
+So, for any $\xx$, the value of $-c(\xx)$ is a lower bound on the
+minimum energy $\energy(\ff^*)$.
 
 This turns out to be an instance of a much broader phenomenon, known
 as Lagrangian duality, which allows us to learn a lot about many
-optimization problems by studying two related pairs of problems.
+optimization problems by studying two related pairs of problems, a
+minimization problem, and a related maximizatio problem that gives
+lower bounds on the optimal value of the minimization problem.
 
 \paragraph{Solving $\LL \xx = \dd$.}
 Given a graph $G$ with resistances for the edges, and some net flow
