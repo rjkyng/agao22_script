@@ -148,7 +148,7 @@ For any connected graph $G$, we have that the lazy random walk converges to the 
 Let us now come to the main result that we want to prove this lecture. 
 
 \begin{theorem}
-For any $\pp_0$, at any time step $t$, we have for $\pp_t = \WWtil^t \pp_0$ that
+In any unweighted (a.k.a.\ unit weight) connected graph $G$, for any $\pp_0$, at any time step $t$, we have for $\pp_t = \WWtil^t \pp_0$ that
 \[
 \| \pp_t - \ppi \|_{\infty}  \leq e^{-\nu_2 \cdot t/2} \sqrt{n} 
 \]
@@ -157,7 +157,7 @@ For any $\pp_0$, at any time step $t$, we have for $\pp_t = \WWtil^t \pp_0$ that
 Instead of proving the theorem above, we prove the lemma below which gives point-wise convergence. This makes it more convenient to derive a proof and it is not hard to deduce the theorem above as a corollary.
 
 \begin{lemma}
-For all $a,b \in V$, and any time step $t$, we have for $\pp_0 = \vecone_a$ and $\pp_t = \WWtil^t \pp_0$ that
+  In any weighted connected graph $G$, for all $a,b \in V$, and any time step $t$, we have for $\pp_0 = \vecone_a$ and $\pp_t = \WWtil^t \pp_0$ that
 \[
   |\pp_t(b) - \ppi(b)| \leq e^{-\nu_2 \cdot t/2} \sqrt{\dd_b/\dd_a} 
 \]
