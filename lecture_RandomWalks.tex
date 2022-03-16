@@ -195,23 +195,24 @@ Putting everything together (and using $1+x \leq e^x, \forall x \in \mathbb{R}$)
 
 \section{Properties of Random Walks}
 
-We now shift our focus away from convergence of random walks and consider some interesting properties of random walks. Here, we are no longer interested in lazy random walks, although all proofs can be straight-forwardly adapted. While in the previous section, we relied on computing the second eigenvalue of the Normalized Laplacian efficiently, here, we will discover that solving Laplacian systems, that is finding an $\xx$ such that $\LL\xx = \bb$ can solve a host of problems in random walks.
+We now shift our focus away from convergence of random walks and consider some interesting properties of random walks\footnote{Note that this part of the script is in large part inspired by Aaron Sidford's lecture notes on the same subject, in his really interesting course
+\href{https://web.stanford.edu/class/cme305/}{Discrete Mathematics and Algorithms}.}. Here, we are no longer interested in lazy random walks, although all proofs can be straight-forwardly adapted. While in the previous section, we relied on computing the second eigenvalue of the Normalized Laplacian efficiently, here, we will discover that solving Laplacian systems, that is finding an $\xx$ such that $\LL\xx = \bb$ can solve a host of problems in random walks.
 
 \subsection{Hitting Times}
 
 One of the most natural questions one can ask about a random walk starting in a vertex $a$ (i.e. $\pp_0 = \vecone_a$) is how many steps it takes to get to a special vertex $s$. This quantity is called the \emph{hitting time} from $a$ to $s$ and we denote it by $H_{a,s} = \inf \{ t \;|\; \vv_t = s \}$. For the rest of this section, we are concerned with computing the expected hitting time, i.e. $\mathbb{E}[H_{a,s}]$.
 
-It turns out, that it is more convenient to compute \emph{all} expected hitting times $H_{a,s}$ for vertices $a \in V$ to a fixed $s$. We denote by $\hh \in \mathbf{R}^V$, the vector with $\hh_a = \mathbb{E}[H_{a,s}]$. We now show that we can compute $\hh$ by solving a Laplacian system $\LL \hh = \bb$. We will see later in the course that such systems (spoiler alert!) can be solved in time $\tilde{O}(m)$, so this will imply a near-linear time algorithm to compute the hitting times.
+It turns out, that it is more convenient to compute \emph{all} expected hitting times $H_{a,s}$ for vertices $a \in V$ to a fixed $s$. We denote by $\hh \in \mathbf{R}^V$, the vector with $\hh(a) = \mathbb{E}[H_{a,s}]$. We now show that we can compute $\hh$ by solving a Laplacian system $\LL \hh = \bb$. We will see later in the course that such systems (spoiler alert!) can be solved in time $\tilde{O}(m)$, so this will imply a near-linear time algorithm to compute the hitting times.
 
-\paragraph{Hitting Time and the Random Walk Matrix.} Let us first observe that if $s = a$, then the answer becomes trivially $0$, i.e. $\hh_s = 0$. 
+\paragraph{Hitting Time and the Random Walk Matrix.} Let us first observe that if $s = a$, then the answer becomes trivially $0$, i.e. $\hh(s) = 0$. 
 
 We compute the rest of the vector by writing down a system of equations that recursively characterizes $\hh$. Observe therefore first that for any $a \neq s$, we have that the random walks starting at $a$ will next visit a neighbor $b$ of $a$. If the selected neighbor $b = s$, the random walks stops; otherwise, the random walks needs in expectation $\mathbb{E}[H_{b,s}]$ time to move to $s$. 
 
 We can express this algebraically by
 \[
-\hh_a = 1 + \sum_{a \sim b} \mathbb{P}[v_{t+1} = b \;| v_t = a]  \cdot \hh_b = 1 + \sum_{a \sim b} \frac{w(a,b)}{\dd(a)}  \cdot \hh_b =  1 + (\WW\vecone_a)^{\trp} \hh = 1 + \vecone_a^{\trp} \WW^{\trp} \hh.
+\hh_a = 1 + \sum_{a \sim b} \mathbb{P}[v_{t+1} = b \;| v_t = a]  \cdot \hh(b) = 1 + \sum_{a \sim b} \frac{w(a,b)}{\dd(a)}  \cdot \hh(b) =  1 + (\WW\vecone_a)^{\trp} \hh = 1 + \vecone_a^{\trp} \WW^{\trp} \hh.
 \]
-Using that $\hh_a = \vecone_a^{\trp} \hh =  \vecone_a^{\trp} \II \hh$, we can rewrite this as 
+Using that $\hh(a) = \vecone_a^{\trp} \hh =  \vecone_a^{\trp} \II \hh$, we can rewrite this as 
 \[
 1 = \vecone_a^\trp (\II - \WW^\trp) \hh.
 \]
@@ -231,15 +232,15 @@ Finally, we observe that we only have a solution to the above system if and only
 \[
 \vecone^{\trp}(\dd - \alpha \cdot \dd(s) \cdot \vecone_s) = \|\dd\|_1 - \alpha \cdot \dd(s) \iff \alpha =  \|\dd\|_1 /\dd(s).
 \]
-We have now formalized $\LL$ and $\bb$ completely. A last detail that we should not forget about is that any solution $\xx$ to such system $\LL \xx = \bb$ is not necessarily equal $\hh$ but has the property that it is shifted from $\hh$ by the all-ones vector. Since we require $\hh_s = 0$, we can reconstruct $\hh$ from $\xx$ straight-forwardly by subtracting $\xx_s \vecone$.
+We have now formalized $\LL$ and $\bb$ completely. A last detail that we should not forget about is that any solution $\xx$ to such system $\LL \xx = \bb$ is not necessarily equal $\hh$ but has the property that it is shifted from $\hh$ by the all-ones vector. Since we require $\hh(s) = 0$, we can reconstruct $\hh$ from $\xx$ straight-forwardly by subtracting $\xx(s) \vecone$.
 
 \begin{theorem}
-	Given a connected graph $G$, a special vertex $s \in V$. Then, we can formalize a Laplacian system $\LL \xx = \bb$ (where $\LL$ is the Laplacian of $G$) such that the expected hitting times to $s$ are given by $\hh = \xx - \xx_s \vecone$. We can reconstruct $\hh$ from $\xx$ in time $O(n)$.
+	Given a connected graph $G$, a special vertex $s \in V$. Then, we can formalize a Laplacian system $\LL \xx = \bb$ (where $\LL$ is the Laplacian of $G$) such that the expected hitting times to $s$ are given by $\hh = \xx - \xx(s) \vecone$. We can reconstruct $\hh$ from $\xx$ in time $O(n)$.
 \end{theorem}
 
 \paragraph{Hitting Times and Electrical Networks.} Seeing that hitting times can be computed by formulating a Laplacian system $\LL \xx = \bb$. You might remember that in the first lecture, we argued that a system $\LL \xx = \bb$ also solves the problem of routing a demand $\bb$ via an electrical flow with voltages $\xx$. 
 
-Indeed, we can interpret computing expected hitting times $\hh$ to a special vertex $s$ as the problem of computing the electrical voltages $\xx$ where we insert (or more technically correct apply) $\dd(a)$ units of current at every vertex $a \neq s$ and where we remove $\vecone^\trp\dd - \dd(s)$ units of current at the vertex $s$. Then, we can express expected hitting time to some vertex $a$ as the voltage difference to $s$: $\mathbb{E}[H_{a,s}] = \hh_a = \xx_a - \xx_s$.
+Indeed, we can interpret computing expected hitting times $\hh$ to a special vertex $s$ as the problem of computing the electrical voltages $\xx$ where we insert (or more technically correct apply) $\dd(a)$ units of current at every vertex $a \neq s$ and where we remove $\vecone^\trp\dd - \dd(s)$ units of current at the vertex $s$. Then, we can express expected hitting time to some vertex $a$ as the voltage difference to $s$: $\mathbb{E}[H_{a,s}] = \hh(a) = \xx(a) - \xx(s)$.
 
 \subsection{Commute Time}
 
@@ -247,11 +248,9 @@ A topic very related to hitting times are \emph{commute times}. That is for two 
 
 \paragraph{Commute Times via Electric Flows.} Recall that expected hitting times have an electric flow interpretation. 
 
-Now, let us denote by $\xx$ a solution to the Laplacian system $\LL \xx = \bb_b$ where the demand is $\bb_b = \dd - \dd^\trp \vecone \cdot \vecone_b \in \ker(\vecone)^\perp$. Recall that we have $\mathbb{E}[H_{z,b}] = \xx_z - \xx_b$ for all $z$. 
+Now, let us denote by $\xx$ a solution to the Laplacian system $\LL \xx = \bb_b$ where the demand is $\bb_b = \dd - \dd^\trp \vecone \cdot \vecone_b \in \ker(\vecone)^\perp$. Recall that we have $\mathbb{E}[H_{z,b}] = \xx(z) - \xx(b)$ for all $z$. Similarly, we can compute voltages $\yy$ to the Laplacian system $\LL \yy = \bb_a$ where $\bb_a = \dd - \dd^\trp \vecone \cdot \vecone_a \in \ker(\vecone)^\perp$. Again, $\mathbb{E}[H_{z,a}] = \yy(z) - \yy(a)$ for all $z$.
 
-Similarly, we can compute voltages $\yy$ to the Laplacian system $\LL \yy = \bb_a$ where $\bb_a = \dd - \dd^\trp \vecone \cdot \vecone_a \in \ker(\vecone)^\perp$. Again, $\mathbb{E}[H_{z,a}] = \yy_z - \yy_a$ for all $z$. Note that, if we revert the flow by negating $\yy$, then we can still compute the hitting time by taking $\mathbb{E}[H_{z,a}] = -(-\yy_z - (-\yy_a)) = -(\yy_a-\yy_z)$.
-
-Thus, inducing voltages $\xx - \yy$ on the graph $G$, we now have by linearity that $\mathbb{E}[C_{a,b}] = \mathbb{E}[H_{a,b}+H_{b,a}] = |\xx_a - \xx_b| + |\yy_a-\yy_b|$. But these voltages are also induced by $\LL (\xx - \yy) = \bb_b - \bb_a = \dd^\trp \vecone (\vecone_a - \vecone_b)$ (again by linearity). That is the flow that routes $\|\dd\|_1$ units of flow from $b$ to $a$.  
+But observe that this allows us to argue by linearity that $\mathbb{E}[C_{a,b}] = \mathbb{E}[H_{a,b} + H_{b,a}] = \mathbb{E}[H_{a,b}] + \mathbb{E}[H_{b,a}] = \xx(a) - \xx(b) + \yy(b) - \yy(a) = (\vecone_a - \vecone_b)^\top (\xx - \yy)$. But using linearity again, we can also argue at the same time that we obtain the vector $\zz = (\xx - \yy)$ as a solution to the problem $\LL\zz = \bb_b - \bb_a = \dd^\trp \vecone (\vecone_a - \vecone_b)$. That is the flow that routes $\|\dd\|_1$ units of flow from $b$ to $a$.
 
 \begin{theorem}
 	Given a graph $G=(V,E)$, for any two fixed vertices $a,b \in V$, the expected commute time $C_{a,b}$ is given by the voltage difference between $a$ and $b$ for any solution $\zz$ to the Laplacian system $\LL \zz = \|\dd\|_1 \cdot (\vecone_b - \vecone_a)$.
