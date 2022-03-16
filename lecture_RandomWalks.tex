@@ -12,7 +12,7 @@ Today, we talk about random walks on graphs and how the spectrum of the Laplacia
 \paragraph{Random Walk Basics.} We call a random sequence of vertices $v_0, v_1, \dots$ a \emph{random walk} on $G$, if $v_0$ is a vertex in $G$ chosen according to some probability distribution $\pp_0 \in \mathbb{R}^V$; and for any $t \geq 0$, we have 
 \[
 \mathbb{P}[v_{t+1} = v \; | v_t = u] = \begin{cases}
-    w(u,v)/\dd(u) & \text{if } \{u,v\} \in E,\\
+    \ww(u,v)/\dd(u) & \text{if } \{u,v\} \in E,\\
     0 & \text{otherwise}.
 \end{cases}
 \]
@@ -26,7 +26,7 @@ Today, we talk about random walks on graphs and how the spectrum of the Laplacia
 
 To gain some intuition for the definition,  assume first that the graph $G$ is undirected. Consider a {\color{red}particle} that is placed at a random vertex $v_0$ initially. Then at each step the particle is moved to a neighbor of the current vertex it is resting at, where the neighbor is chosen uniformly at random. 
 
-If the graph is weighted, then instead of choosing a neighbor $v_{t+1}$ of a vertex $v_t$ at each step uniformly at random, one chooses a neighbor $v$ of $v_t$ with probability $w(v,v_t)$ divided by the degree $\dd(v_t)$.
+If the graph is weighted, then instead of choosing a neighbor $v_{t+1}$ of a vertex $v_t$ at each step uniformly at random, one chooses a neighbor $v$ of $v_t$ with probability $\ww(v,v_t)$ divided by the degree $\dd(v_t)$.
 
 \paragraph{The Random Walk Matrix.} We now define the random walk matrix $\WW$ by
 \[
@@ -35,7 +35,7 @@ If the graph is weighted, then instead of choosing a neighbor $v_{t+1}$ of a ver
 and observe that for all vertices $u,v \in V$ (and any $t$), we have that 
 \[
 \WW_{vu} = \begin{cases}
-    w(u,v)/\dd(u) & \text{if } \{u,v\} \in E,\\
+    \ww(u,v)/\dd(u) & \text{if } \{u,v\} \in E,\\
     0 & \text{otherwise}.
 \end{cases}
 \]
@@ -210,7 +210,7 @@ We compute the rest of the vector by writing down a system of equations that rec
 
 We can express this algebraically by
 \[
-\hh_a = 1 + \sum_{a \sim b} \mathbb{P}[v_{t+1} = b \;| v_t = a]  \cdot \hh(b) = 1 + \sum_{a \sim b} \frac{w(a,b)}{\dd(a)}  \cdot \hh(b) =  1 + (\WW\vecone_a)^{\trp} \hh = 1 + \vecone_a^{\trp} \WW^{\trp} \hh.
+\hh_a = 1 + \sum_{a \sim b} \mathbb{P}[v_{t+1} = b \;| v_t = a]  \cdot \hh(b) = 1 + \sum_{a \sim b} \frac{\ww(a,b)}{\dd(a)}  \cdot \hh(b) =  1 + (\WW\vecone_a)^{\trp} \hh = 1 + \vecone_a^{\trp} \WW^{\trp} \hh.
 \]
 Using that $\hh(a) = \vecone_a^{\trp} \hh =  \vecone_a^{\trp} \II \hh$, we can rewrite this as 
 \[

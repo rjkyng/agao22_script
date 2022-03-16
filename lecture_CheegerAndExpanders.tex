@@ -1,4 +1,4 @@
-\newcommand\vol{\mathit{vol}}
+\newcommand\vol{\operatorname{vol}}
 
 \chapter{Conductance, Expanders and Cheeger's Inequality}
 \label{chap:cheegersInequality}
@@ -139,7 +139,9 @@ Slightly more surprisingly, we can also show that the second eigenvalue $\lambda
 We have $\phi(G) \leq \sqrt{2 \cdot \lambda_2(\NN)}$.
 \end{theorem}
 \begin{proof}
-To prove the theorem, we want to show that for \emph{any} $\zz \perp \dd$, we can find a set $\emptyset \subset S \subset V$, such that 
+To prove the theorem, we want to show that for \emph{any} $\zz \perp
+\dd$, we can find a set $\emptyset \subset S \subset V$ with $\vol(S)
+\leq \vol(V)/2$, such that 
 \begin{equation}\label{eq:findTightCutCheeger}
 \frac{\vecone_S^\trp \LL \vecone_S}{\vecone_S^\trp \DD \vecone_S}  \leq \sqrt{2 \cdot \frac{\zz^\trp \LL \zz}{\zz^\trp \DD \zz}}.    
 \end{equation}
