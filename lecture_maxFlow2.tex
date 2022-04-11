@@ -1,0 +1,406 @@
+% \documentclass[draft,11pt]{article}
+%\documentclass[11pt]{article}
+%\input{../defs}
+%\input{../layout-defs}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{amsthm}
+%\usepackage{graphicx}
+%\usepackage{float}
+%\usepackage[ruled,vlined]{algorithm2e}
+%\SetKwBlock{Repeat}{repeat}{}
+%%% for this lecture
+%\newcommand{\gap}{\text{gap}}
+% \newtheorem{theorem}{Definition}
+%\interfootnotelinepenalty=10000
+% \newtheorem{lemma}{Lemma}
+
+%\usepackage{tikz}
+%\usetikzlibrary{arrows}
+
+\chapter{Classical
+  Algorithms for Maximum Flow II}
+\label{cha:maxflow2}
+
+%\begin{document}
+
+\sloppy
+%\lecture{11 --- Wednesday, May 6th}
+%{Spring 2020}{Rasmus Kyng, Scribe: Timon Knigge}{Classical
+  %Algorithms for Maximum Flow II}
+
+\section{Overview}
+In this chapter we continue looking at classical max flow algorithms. We derive Dinic's algorithm which
+(unlike Ford-Fulkerson) converges in a polynomial number of iterations. We will also show faster
+convergence on unit capacity graphs.
+The setting is the same as last chapter: we have a directed graph $G = (V, E, \cc)$ with
+positive capacities
+on the edges. Our goal is to solve the maximum flow problem on this graph for a given source $s$ and sink
+$t \neq s$:
+
+\begin{align}
+  \begin{aligned}
+    \max_{F>0} \;F\qquad\text{s.t.}\quad&\BB\ff = F\bb_{s,t} \\
+    &\veczero\leq \ff\leq \cc
+  \end{aligned}
+\end{align}
+
+\section{Blocking Flows}
+Let $\ff$ be any feasible flow in $G$ and let $G_{\ff}$ be its residual graph.
+Observe that we can partition the
+vertices of $G_{\ff}$ into `layers': first $s$ itself, then all vertices reachable from $s$ in one hop, then all
+vertices reachable in two hops, etc. For each vertex $v\in V$ define its \textbf{level} in $G_{\ff}$ as the
+length of the shortest path in $G_{\ff}$ from $s$ to $v$, denoted by $\ell_{G_{\ff}}(v)$ (or just $\ell(v)$ if the
+graph is clear from context). An edge $(u, v) \in E$ can only take you up `one level': if
+$\ell(v) \geq 2+\ell(u)$ this would imply we can find a shorter $s$-$v$ path by appending $(u, v)$ to the
+shortest $s$-$u$ path. However, edges can `drop down' multiple levels (or be contained in the same level).
+
+A key strategy in Dinic's algorithm will be to focus on `short' augmenting paths. We can use the levels we
+defined above to isolate a subgraph of $G_{\ff}$ containing all information we need to find shortest paths.
+\begin{definition}
+  Call an edge $(u, v)$ \textbf{admissible} if $\ell(u)+1 = \ell(v)$. Let $L$ be the set of
+  admissible edges in $G_{\ff}$ and define the \textbf{level graph} of $G_{\ff}$ to be the subgraph
+  induced by these edges.
+\end{definition}
+
+\begin{definition}
+  Define a \textbf{blocking flow} in a residual graph $G_{\ff}$ to be a flow $\hat{\ff}$ feasible in $G_{\ff}$,
+  such that $\hat{\ff}$ only uses admissible edges. Furthermore we require that for any $s$-$t$ path in
+  the level graph of $G_{\ff}$, $\hat{\ff}$ saturates at least one edge on this path.
+\end{definition}
+
+The last condition makes a blocking flow `blocking': it blocks any shortest augmenting path in $G_{\ff}$ by
+saturating one of its edges. Note however that a blocking flow is not necessarily a maximum flow in the
+level graph:
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+    \tikzset{edge/.style = {->,> = latex'}}
+
+    \node[vertex] (a) at (0, 0) {$s$};
+    \node[vertex] (b) at (2, -1) {};
+    \node[vertex] (c) at (2, 1) {};
+    \node[vertex] (d) at (4, 0) {};
+    \node[vertex] (e) at (4, 2) {};
+    \node[vertex] (f) at (6, 1) {$t$};
+
+    \draw[edge] (a) -- (b) node [midway, below] {$0/1$};
+    \draw[edge] (b) -- (d) node [midway, below] {$0/1$};
+    \draw[edge] (c) -- (e) node [midway, above] {$0/1$};
+    \draw[edge] (e) -- (f) node [midway, above] {$0/1$};
+
+    \draw[edge, line width=2pt] (a) -- (c) node [midway, above] {$1/1$};
+    \draw[edge, line width=2pt] (c) -- (d) node [midway, above] {$1/1$};
+    \draw[edge, line width=2pt] (d) -- (f) node [midway, below] {$1/1$};
+
+  \end{tikzpicture}
+  \caption{A blocking flow is not a maximum flow.}
+\end{figure}
+
+\section{Dinic's Algorithm}
+We can now formulate Dinic\footnote{Sometimes also transliterated as Dinitz.}'s algorithm: start with
+$\ff = \veczero$, and then repeatedly add to $\ff$ a blocking flow $\hat{\ff}$ in $G_{\ff}$, until no more $s$-$t$ paths
+exist in $G_{\ff}$.
+
+Note that by doing a path decomposition on $\hat{\ff}$ and adding these paths to $\ff$ one by one, we see that
+our algorithm is a `special case' of Ford-Fulkerson (with a particular augmenting path strategy) and hence
+inherits all the behaviors/bounds we proved in the last chapter.
+
+\begin{lemma}
+  Let $\ff$ be a feasible flow, $\hat{\ff}$ a blocking flow in $G_{\ff}$ and define $\ff' = \ff+\hat{\ff}$ (think
+  of $\ff$ and $\ff'$ to be the flows at some steps $k$ and $k+1$ in the algorithm). Then
+  $\ell_{G_{\ff'}}(t) \geq \ell_{G_{\ff}}(t) + 1$.
+\end{lemma}
+\begin{proof}
+  Let $L, L'$ be the edge sets of the level graphs of $G_{\ff}, G_{\ff'}$
+  respectively.
+  % \todo{I didn't really
+  %   get the proof in the class for this part very well so I wrote my own. Feel
+  %   free to change, I hope it's okay though.}
+  We would now like to show that $d_{L'}(s, t) \geq 1 + d_L(s, t)$. Let's first assume that in fact
+  $d_{L'}(s, t) < d_L(s, t)$. Now take a shortest $s$-$t$ path in the level graph of
+  $G_{\ff'}$, say $s=v_0, v_1, \dots, v_{d_{L'}(s, t)} =  t$.
+  Let $v_j$ be the first vertex along the path such that
+  $d_{L'}(s, v_j) < d_L(s, v_j)$.
+  As $d_{L'}(s, t) < d_L(s, t)$, such a $v_j$ must exist.
+
+  We'd like to understand the edges in the level
+  graph $L'$.
+  Let $E(G_{\ff})$ denote the edges of the $G_{\ff}$,
+  and let $\operatorname{rev}(L)$ denote the set of
+  reversed edges of $L$.
+  The level graph edges of $G_{\ff'}$ must satisfy
+  $L' \subseteq L \union
+  \operatorname{rev}(L) \union (E(G_{\ff}) \setminus
+  L)$.
+
+  In our $s$-$t$ path in $L'$, the vertex $v_j$ is reached by an edge from $v_{j-1}$,
+  and the level of $v_{j-1}$ in $G_{\ff}$ and $G_{\ff'}$
+  are the same, so the edge $(v_{j-1},v_j) \in L$ skips
+  at least one level forward  in $G_{\ff}$.
+  But, edges in $L$ do not skip a level in
+  $G_{\ff}$, and edges in
+  $\operatorname{rev}(L)$ or
+  $E(G_{\ff}) \setminus L$ do not move from a lower level to higher
+  level in $G_{\ff}$.
+  So this edge cannot exist and we have reached a contradiction.
+  % Write down the levels of the vertices in
+  % $G_{\ff}$ along the path,
+  % then
+  % there are more levels in $G_{\ff}$ than
+  % there are vertices in the path, so there must a be
+  % level in $G$
+  % so by the pigeonhole principle there must be a level in $G_{\ff}$ that
+  % the path jumps over, i.e. there is some edge that jumps up more than one
+  % level in $G_{\ff}$.
+  % However, we claim this is impossible. Such an edge cannot exist in $G_{\ff}$ by definition of the level
+  % graph. The only other edges in $G_{\ff'}$ are reversals of edges used in the blocking flow $\hat{\ff}$,
+  % but by construction this flow only uses admissible edges in $G_{\ff}$ (i.e. edges that `step up' one
+  % level). Hence the edge $(v_i, v_{i+1})$ cannot exist and we have arrived at a contradiction.
+
+  Now suppose that $d_{L'}(s, t) = d_L(s, t)$. This means there is an $s$-$t$ path in $L'$ using
+  edges in $L$ -- but such a path must contain an edge saturated by
+  the blocking flow $\hat{\ff}$.
+
+  (Note: the reason this path must use only edges in $L$ is similar to
+  the previous case: the other possible types of edges do not move
+  to higher levels in $G_{\ff}$ at all, making the path too long if we use any of them.)
+
+  So we must have $d_{L'}(s, t) \geq 1 + d_L(s, t)$.
+\end{proof}
+An immediate corollary of this lemma is the convergence of Dinic's algorithm:
+\begin{theorem}
+  Dinic's algorithm terminates in $O(n)$ iterations.
+\end{theorem}
+\begin{proof}
+  By the previous lemma, the level of $t$ increases by at least one each iteration. A shortest path
+  can only contain each vertex once (otherwise it would contain a cycle) so the level of any vertex
+  is never more than $n$.
+\end{proof}
+
+For graphs with unit capacities ($c = 1$) we can prove even better bounds on the number of iterations.
+\begin{theorem}
+  On unit capacity graphs, Dinic's algorithm terminates in
+  $$O\left(\min\{m^{1/2}, n^{2/3}\}\right)$$ iterations.
+\end{theorem}
+\begin{proof}
+  We prove the two bounds separately.
+  \begin{enumerate}
+  \item Suppose we run Dinic's algorithm for $k$ iterations, obtaining a flow $\ff$ that is
+    feasible but not necessarily yet optimal. Let $\tilde{\ff}$ be an optimal flow in
+    $G_{\ff}$ (i.e. $\ff+\tilde{\ff}$ is a maximum flow for the whole graph),
+    and consider a path decomposition of $\tilde{\ff}$. Since after $k$ iterations
+    any $s$-$t$ path has length $k$ or more, we use up a total capacity of at least
+    $\text{val}(\tilde{\ff})k$ across all edges. But the edges in $G_{\ff}$ are either edges
+    from the original graph $G$ or their reversals (but never both) meaning the total
+    capacity of $G_{\ff}$ is at most $m$, hence $\text{val}(\tilde{\ff}) \leq m/k$.
+
+    Recalling our earlier observation that our algorithm is a special case of
+    Ford-Fulkerson, this implies that our algorithm will terminate after at most
+    another $m/k$ iterations. Hence the number of iterations is bounded by $k+m/k$ for
+    any $k>0$. Substituting $k=\sqrt{m}$ gives the first desired bound.
+  \item Suppose again that we run Dinic's algorithm for $k$ iterations obtaining a flow $\ff$.
+    The level graph of $G_{\ff}$ partitions the vertices into sets
+    $D_i = \{u\mid\ell(u) = i\}$ for $i\geq 0$.
+    As shown before, the sink $t$ must be at a level of at
+    least $k$, meaning we have at least this many non-empty levels starting from
+    $D_0 = \{s\}$. To simplify, discard all vertices and levels beyond $D_{\ell(t)}$.
+
+    Now, consider choosing a level $I$ uniformly at random from
+    $\setof{1,\ldots,k}$.
+    Since there are at most $n-1$ vertices in total across these levels,
+    $\E{\abs{D_I}} \leq (n-1)/k$, and by Markov's inequality
+    \[
+      \Pr[ \abs{D_I} \geq 2n/k ] \leq
+      \frac{(n-1)/k}{2n/k} < \frac{1}{2}
+      .
+    \]
+    % \todo{I found this a bit easier to follow than Markov, feel free to change (again).}
+    % divide the levels into two groups: those with $|D_i|\leq 2n/k$ and those with
+    % $|D_i| > 2n/k$. If the latter group contained at least $k/2$ levels then together
+    % they would contain strictly more than $(2n/k)\cdot(k/2) = n$ vertices, which is a
+    % contradiction (note the $D_i$ are disjoint), so more than $k-k/2 = k/2$ levels
+    % satisfy the first condition,
+
+    Thus strictly more than $k/2$ of the levels $i \in \setof{1,\ldots,k}$
+    have $\abs{D_i} < 2n/k$ and so there must be two adjacent levels $j$, $j+1$
+    for which this upper bound on the size holds.
+    There can be at most
+    $|D_j|\cdot|D_{j+1}| \leq 4n^2/k^2$ edges between these levels, and by the min-cost
+    max-flow theorem we saw in the previous chapter, this is an upper bound on the flow
+    in $G_{\ff}$, and hence on the number of iterations still needed for our algorithm to
+    terminate.
+
+    This means the number of iterations is bounded by $k + 4n^2/k^2$ for any $k>0$,
+    which is $O(n^{2/3})$ at $k=2n^{2/3}$.
+  \end{enumerate}
+\end{proof}
+
+\section{Finding Blocking Flows}
+ \label{sec:findBlockingFlows} 
+What has been missing from our discussion so far is the process of actually finding a blocking flow.
+We can achieve this using repeated depth-first search. We repeatedly do a search in the level graph (so
+only using edges $L$) for $s$-$t$ paths and augment these. We erase edges whose subtrees have been
+exhausted and do not contain any augmenting paths to $t$. Pseudocode for the algorithm is given below.
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  $\ff \leftarrow \veczero$\;
+  $H \leftarrow L$\;
+  \Repeat{
+    $P\leftarrow\text{\textsc{Dfs}}(s, H, t)$\;
+    \eIf{$P\neq\emptyset$}{
+      Let $\hat{\ff}$ be a flow that saturates path $P$.\\
+      $\ff\leftarrow \ff+\hat{\ff}$\;
+      Remove from $H$ all edges saturated by $\hat{\ff}$.
+    }{
+      \Return{\ff}\;
+    }
+  }
+  \caption{\textsc{FindBlockingFlow}}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \If{$u=t$}{\Return{\textnormal{the path $P$ on the dfs-stack.}}}
+  \For{$(u,v)\in H$}{
+    $P\leftarrow\text{\textsc{Dfs}}(v, H, t)$\;
+    \eIf{$P\neq\emptyset$}{
+      \Return{$P$}\;
+    }{
+      Erase $(u, v)$ from $H$.
+    }
+  }
+  \Return{$\emptyset$}\;
+  \caption{\textsc{Dfs}(u, H, t)}
+\end{algorithm}
+
+\begin{lemma}
+  For general graphs, \textsc{FindBlockingFlow} returns a blocking flow in $O(nm)$ time.
+  Hence Dinic's algorithm runs in $O(n^2 m)$ time on general capacity graphs.
+\end{lemma}
+\begin{proof}
+  % We sketch an approach to amortized analysis of the running time.
+  First, consider the amount of work spent pushing edges onto the
+  stack which eventually results in augmentation along an $s$-$t$ path
+  consisting of those edges (i.e.\ adding flow along that path).
+  Since each augmenting path saturates at least one edge,  we do at most $m$ augmentations. Each
+  path has length at most $n$.
+  Thus the total amount of work pushing these edges to the stack, and removing them
+  from the stack upon augmentation, and deleting saturated edges, can
+  be bounded by $O(mn)$.
+  Now consider the work spent pushing edges onto the stack which are
+  later deleted because we ``retreat'' after not finding an $s$-$t$.
+  An edge can only be pushed onto the stack once in this way, since it
+  is then deleted. So the total amount spent pushing edges to the
+  stack and deleting them this way is $O(m)$.
+   % First, consider the amount of work spent pushing edges onto the
+  % Since each augmenting path saturates at least one edge, there are at most $m$ augmenting paths. Each
+  % path has length at most $n$.
+  % Hence the calls to \textsc{Dfs} that result in augmenting paths account for
+  % $O(mn)$ work jointly. The calls to \textsc{Dfs} that do not result in an augmenting path together account
+  % for $O(m)$ work because each such call erases an edge, meaning across the whole algorithm run there are at
+  % most $m$ such calls.
+\end{proof}
+\begin{lemma}
+  For unit capacity graphs, \textsc{FindBlockingFlow} returns a blocking flow in $O(m)$ time. Hence Dinic's
+  algorithm runs in $O\left(\min\{m^{3/2}, mn^{2/3}\}\right)$ time on unit capacity graphs.
+\end{lemma}
+\begin{proof}
+  When our depth-first search traverses some edge $(u, v)$, one of two things will happen: either we find no
+  augmenting path in the subtree of $v$, leading to the erasure of this edge, or we find an augmenting path
+  which will necessarily saturate $(u, v)$, again leading to its erasure. This means each edge will be
+  traversed at most once by the depth-first search.
+\end{proof}
+
+Another interesting bound on the runtime, which we will not prove here, is that Dinic's algorithm will run in
+$O\left(\abs{E}\sqrt{\abs{V}}\right)$ time on bipartite matching graphs.
+
+\section{Minimum Cut as a Linear Program}
+Finally we show that minimum cut may be formulated as a linear program. For a subset $S \subseteq V$ write
+$c_G(S)$ for the sum of $\cc(e)$ over all edges $e = (u, v)$ that cross the cut, i.e.\ $u \in S, v\not\in S$.
+Note that `reverse' edges are not counted in this cut. The minimum cut problem asks us to find some $S\subseteq V$
+such that $s\in S$ and $t\not\in S$ such that $c_G(S)$ is minimal.
+\begin{align}
+  \begin{aligned}
+    \min_{S\subseteq V} \quad &c_G(S) \\
+    s.t.\quad & s \in S \\
+    &t\not\in S\\
+  \end{aligned}
+  \label{prog0}
+\end{align}
+
+We claim this is equivalent to the following
+minimization problem:
+\begin{align}
+  \begin{aligned}
+    \min_{\xx \in \R^{V}} \quad &\sum_{e\in E} \cc(e) \max\left\{\bb_e^\trp \xx, 0\right\} \\
+    s.t. \quad & \xx(s) = 0 \\
+    & \xx(t) = 1 \\
+    &\veczero\leq \xx\leq \vecone \\
+  \end{aligned}
+  \label{prog1}
+\end{align}
+Recall $\bb_e^\trp \xx = \xx(v) - \xx(u)$ for $e = (u, v)$.
+We can rewrite this as a proper linear program by
+introducing extra variables for the maximum:
+\begin{align}
+  \begin{aligned}
+    \min_{\xx \in \R^{V}, \uu \in \R^{E}} \quad & \cc^\trp \uu \\
+    s.t. \quad & \bb_{s,t}^\trp\xx = 1 \\
+    &\veczero\leq \xx\leq \vecone \\
+    &\uu \geq \veczero \\
+    &\uu \geq \BB^\trp \xx \\
+  \end{aligned}
+  \label{prog2}
+\end{align}
+And, in fact, we'll also see that we don't need the constraint
+$\veczero\leq \xx\leq \vecone$, leading to the following simpler
+program:
+\begin{align}
+  \begin{aligned}
+    \min_{\xx \in \R^{V}, \uu \in \R^{E}} \quad & \cc^\trp \uu \\
+    s.t. \quad & \bb_{s,t}^\trp\xx = 1 \\
+    &\uu \geq \veczero \\
+    &\uu \geq \BB^\trp \xx \\
+  \end{aligned}
+  \label{prog3}
+\end{align}
+
+\begin{lemma}
+  Programs \eqref{prog0}, \eqref{prog2}, and \eqref{prog3} have equal optimal values.
+\end{lemma}
+\begin{proof}
+  We start by considering equality between optimal values of Program
+  \eqref{prog0} and Program \eqref{prog2}
+  Let $S$ be an optimal solution to Program~\eqref{prog0} and take $\xx = \vecone_{V\setminus S}$. Then $\xx$ is a
+  feasible solution to Program~\eqref{prog2} with cost equal to $c_G(S)$.
+
+  Conversely, suppose $\xx$ is an optimal solution to Program~\eqref{prog2}. Let $\alpha$ be uniform in $[0,1]$ and define
+  $S = \{v\in V\mid\xx(v) \leq \alpha\}$. This is called a threshold cut.
+  We can verify that
+  \[ \Pr\left[\text{$e$ is cut by $S$}\right] = \max\{\bb_e^\trp \xx, 0\}. \]
+  and hence $\mathbb{E}_t [c_G(S)]$ is exactly the optimization function of \ref{prog1} (and hence
+  \ref{prog2}).
+  Since at least one outcome must do as well as the average, there is a subset $S\subseteq V$ achieving this value
+  (or less).
+
+  We can use the same threshold cut to show that we can round a
+  solution to Program~\eqref{prog3} to an equal or smaller value cut
+  feasible for Program~\eqref{prog0}. The only difference is that in
+  this case, we get
+  \[
+    \Pr\left[\text{$e$ is cut by $S$}\right] \leq \max\{\bb_e^\trp \xx, 0\}
+  \]
+  which is still sufficient.
+\end{proof}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "agao21_script"
+%%% End:
+
+%\end{document}
