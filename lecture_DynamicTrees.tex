@@ -1,6 +1,8 @@
 \chapter{Link-Cut Trees}
+\newcommand{\key}{\operatorname{key}}
+\newcommand{\prio}{\operatorname{prio}}
 
-In this chapter, we will learn about a dynamic data structure that allows us to speed-up Dinic's algorithm even more: \emph{Link-Cut Trees}. This chapter is inspired by lecture notes of Richard Peng\footnote{CS7510 Graph Algorithms Fall 2019, Lecture 17 at https://faculty.cc.gatech.edu/~rpeng/CS7510\_F19/} and the presentation in a very nice book on data structures and network flows by Robert Tarjan \cite{tarjan1983data}.
+In this chapter, we will learn about a dynamic data structure that allows us to speed-up Dinic's algorithm even more: \emph{Link-Cut Trees}. This chapter is inspired by lecture notes of Richard Peng\footnote{CS7510 Graph Algorithms Fall 2019, Lecture 17 at \url{https://faculty.cc.gatech.edu/~rpeng/CS7510\_F19/}} and the presentation in a very nice book on data structures and network flows by Robert Tarjan \cite{tarjan1983data}.
 
 \section{Overview}
 
@@ -31,9 +33,44 @@ In this lecture, we restrict ourselves to \emph{dynamic rooted forests} that is 
 We can implement a link-cut tree such that any sequence of $m$ operations takes total expected time $O(m \log^2 n + |V|)$.
 \end{theorem}
 
+
+\section{Balanced Binary Search Trees: A Recap}
+In \href{https://ti.inf.ethz.ch/ew/courses/APC21/Chapter_2.pdf}{Chapter 2 of the course Algorithms, Probability and Computing}, we introduced (balanced) binary search trees, and studied \emph{treaps}, which are a simple randomized approach to building a binary search tree with good performance, at least in expectation.
+If you are not familiar with balanced binary search trees, we encourage you to read this chapter from the APC script. 
+That said, we will quickly recap the important properties of binary search trees and treaps.
+If you're already familiar with treaps, you can skip ahead to the next section to see how we use them for building Link-Cut trees.
+
+A binary search tree $\mathcal{T}$ is a data structure for keeping track of a set of \emph{items} where each item has a \emph{key} associated with it.
+The data structure stores the items in a rooted binary tree with a node for each item, and maintains the property for each node $v$, all items in the \emph{left} subtree of $v$ have keys less than $v$, and all items in the \emph{right} subtree of $v$ have keys greater than $v$.
+This is called the \emph{search property} of the tree, because it makes it simple to search through the tree to determine if it contains an item with a given key.
+
+The binary trees we studied in APC supported the following operations, while maintaining the search property:
+\begin{description}
+\item[insert:] We can add an item to the tree with a specified key.
+\item[delete:] We can remove an item from the tree with a specified key.
+\item[find:] Determine if the tree contains an item with a specified key.
+\item[split:] Suppose the tree contains two items $v_1$ and $v_2$ with keys $k_1$ and $k_2$ where $k_1 < k_2$, and suppose no item in tree has a key $k$ in the interval $(k_1,k_2)$. Then the split operation applied to these two items should split the current tree into two: One tree containing all items with keys in $(-\infty,k_1]$ and the other with all items in $[k_2,\infty)$.
+\item[join:] Given two binary search trees, one with keys in the interval $(-\infty,k]$, the other with keys in the interval $(k,\infty)$, form a single binary search tree containing the items of both.
+\end{description}
+
+\emph{Treaps} allow us to implement all of these operations, each with expected time $O(\log n)$ for each operation when working over $n$ items.
+
+\paragraph{Tree rotations.} A crucial operation when implementing binary search trees in general and treaps in particular is \emph{tree rotation}. A tree rotation makes a local change to the tree by changing only a constant number of pointers around, while preserving the search property.
+Given two items $v_1$ and $v_2$ such that $v_1$ is a child of $v_2$, a tree rotation applied to these two nodes will make $v_2$ the child of $v_1$, while moving their subtrees around to preserve the search property. This is shown in Figure~\ref{fig:binaryTreeRotation}.
+When the rotation makes $v_2$ the right child of $v_1$ (because $v_2$ has the larger key), this is called a \emph{right rotation}, and when it makes $v_2$ the left child of $v_1$ (because $v_2$ has a smaller key), it is called a \emph{left rotation}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{./fig/TreeRotation_lectureDynamicTree.jpeg}
+    \caption{Given two items $v_1$ and $v_2$ such that $v_1$ is a child of $v_2$, a tree rotation applied to these two nodes will make $v_2$ the child of $v_1$, while moving their subtrees around to preserve the search property. This figure shows a \emph{right rotation}.}
+    \label{fig:binaryTreeRotation}
+\end{figure}
+
 \section{A Data Structure for Path Graphs}
 
 Before we prove \Cref{thm:mainTheoremLinkCutTree} in its full generality, let us reason about implementing a link-cut tree data structure in a weaker setting: we assume that every version $G^i$ of $G$ is just a collection of rooted vertex-disjoint paths.
+
+The treap now assigns a random \emph{priority} to each item, denoted $\prio(x)$.
 
 \paragraph{Representing Paths via Balanced Binary Search Trees.} It turns out that paths can be represented rather straight-forwardly via Balanced Binary Search Trees. For the sake of concreteness, we here use \emph{treaps} to represent paths\footnote{If you have not seen treaps before, don't worry, they are simple enough to understand them from our application here. }. 
 
@@ -201,7 +238,8 @@ The only two operations that can cause additional dashed, heavy edges are $\text
 The case for $\textsc{Cut}(u,v)$ is almost analogous: only vertices on the $v$-to-root path decrease their sizes which can cause any heavy edge on such a path to become light, and instead for a sibling of such a vertex might becomes heavy. But there can be at most $\lg n$ such new heavy edges, otherwise the total size of the tree must exceed again $n$ which leads to a contradiction.
 \end{proof}
 
-We conclude that the while-loop in $\textsc{Expose}(\cdot)$ runs for at most $O(m \log n)$ iterations after $m$ updates. Each iteration can be implemented in $O(\log n)$ expected time. This dominates the total running time and proves \Cref{thm:mainTheoremLinkCutTree}.
+Thus, after $m$ updates, we have created at most $O(m \log n)$ dashed heavy edges. The iterations of $\textsc{Expose}(\cdot)$ either visit a dashed light edge (at most $\ln n$ of them), or consumes a dashed heavy edge, i.e. turning them .
+We conclude that after $m$ updates, the while-loop in $\textsc{Expose}(\cdot)$ runs for at most $O(m \log n)$ iterations, \emph{in total}, i.e. summed across the updates so far. Each iteration can be implemented in $O(\log n)$ expected time. This dominates the total running time and proves \Cref{thm:mainTheoremLinkCutTree}.
 
 \section{Fast Blocking Flow via Dynamic Trees}
 
@@ -255,5 +293,5 @@ The correctness of this algorithm follows almost immediately using that the leve
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "agao21_script"
+%%% TeX-master: "main"
 %%% End:
