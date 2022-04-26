@@ -196,7 +196,7 @@ We no longer need to think about the balanced binary trees that are used interna
   $w \gets v$.\\
   \While{$(w' = parent_G(\textsc{PFindRoot}(w))) \neq NULL$}{
     Invoke $\textsc{PCut}(z,w')$ for the solid edge $(z,w')$ incoming to $w'$.\\
-    $\textsc{PLink}(w,w')$.\\
+    $\textsc{PLink}(\textsc{PFindRoot}(w),w')$.\\
     $w \gets w'$.\\
   }
   \caption{\textsc{Expose}(v)}
