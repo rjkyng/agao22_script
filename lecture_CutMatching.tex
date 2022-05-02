@@ -170,39 +170,32 @@ The central claim, we want to prove is the following: given a potential function
     \Phi^t = \sum_{i,j} (\pp_{j \mapsto i}^t - 1/n)^2 = \sum_{i} \|\pp_{i}^t - \vecone/n\|_2^2.
 \]
 \begin{claim}\label{clm:mainClaimCutMatching}
-In the algorithm $\textsc{SparsityCertifyOrCut}(\cdot)$, we have $\mathbb{E}[\Phi^{t} - \Phi^{(t+1)}] \geq \Omega(1/\log n) \Phi^{t}$ with probability $\geq 1 - n^{-3}$.
+In the algorithm $\textsc{SparsityCertifyOrCut}(\cdot)$, we have $\mathbb{E}[\Phi^{t} - \Phi^{(t+1)}] \geq \Omega(1/\log n) \Phi^{t}$.
 \end{claim}
-\begin{corollary}\label{cor:fewRoundsCutMathcing}
+\begin{corollary}
 For appropriate $T = \Theta(\log^2 n)$, the algorithm $\textsc{SparsityCertifyOrCut}(\cdot)$ has $\Phi^{(T+1)} \leq 4/n^2$.
 \end{corollary}
 
-Obtaining the corollary is rather intuitive but unfortunately one has to be quite careful to establish correctness. The more formal proof sketch below can be skipped safely if you trust that this will work.
-
-\begin{proof}[Proof sketch of \Cref{cor:fewRoundsCutMathcing}.]Firstly, one has to get rid of the high probability bound: we can therefore define a random variable $Z$ that is $0$ if the experiment has success and otherwise is equal to $2n$ (where $n$ always upper bounds $\Phi^t$ and $\Phi^{t+1}$). Then, we have $\Phi^{t} - \Phi^{(t+1)} \geq \Omega(1/\log n) \Phi^{t} - Z$ and $\mathbb{E}[\Phi^{t} - \Phi^{(t+1)}] \geq \Omega(1/\log n) \Phi^{t} - \frac{2}{n^2}$.
-
-Once we obtained this result, we observe that the decrease in potential from $\Phi^t$ to $\Phi^{(t+1)}$ solely relies on the randomness after the matching $M_t$ was found. It is therefore not hard to construct a Martingale-type argument to obtain the above bounds.
-\end{proof}
+The corollary follows straight-forwardly since $O(\log n)$ iterations suffice with high probability to reduce the potential by factor $\frac{1}{2}$ (you can use Chernoff here). Then, after $O(\log n)$ such phases consisting of $O(\log n)$ iterations, the potential drops to $1/n^d$ for any $d$ which then goes into the constant factors.
 
 We further observe that this implies that $\{M_1, M_2, \dots, M_{T+1}\}$ is mixing (you can straight-forwardly prove it by a proof of contradiction), and thereby we conclude the proof of our main theorem. 
 
 Let us now give the prove of Claim \ref{clm:mainClaimCutMatching}: 
 
-\paragraph{Interpreting the Potential Drop.} Let us start by writing out the amount by which the potential decreases 
+\paragraph{Interpreting the Potential Drop.} Let us start by observing 
 \begin{align*}
-     \Phi^{t} - \Phi^{(t+1)} = \sum_{i} \|\pp_{i}^t -\vecone/n\|_2^2 - \sum_{i} \|\pp_{i}^{(t+1)} -\vecone/n\|_2^2
+     \Phi^{t} - \Phi^{(t+1)} = \sum_{i} \|\pp_{i}^t -\vecone/n\|_2^2 + \sum_{i} \|\pp_{i}^{(t+1)} -\vecone/n\|_2^2
 \end{align*}
-Considering now matching $M_{t+1}$,  and an edge $(i,j) \in M_{t+1}$. We can re-write the former sum as $\sum_{i} \|\pp_{i}^t -\vecone/n\|_2^2 = \sum_{(i,j) \in M_{t+1}} \|\pp_{i}^t -\vecone/n\|_2^2 + \|\pp_{j}^t -\vecone/n\|_2^2$ as each vertex occurs as exactly one endpoint of a matching edge. We can do the same for the $t+1$-step walk probabilities. Further, recall that for $(i,j) \in M_{t+1}$, we have $\pp_i^{(t+1)} = \pp_j^{(t+1)} = \frac{\pp_i^t+ \pp_j^t}{2}$. Thus,
+Considering now matching $M_{t+1}$,  and an edge $(i,j) \in M_{t+1}$. We can re-write the former sum as $\sum_{i} \|\pp_{i}^t -\vecone/n\|_2^2 = \sum_{(i,j) \in M_{t+1}} \|\pp_{i}^t -\vecone/n\|_2^2 + \|\pp_{j}^t -\vecone/n\|_2^2$ and we can do the same for the $t+1$-step walk probabilities. Further, note that for $(i,j) \in M_{t+1}$, we have $\pp_i^{(t+1)} = \pp_j^{(t+1)} = \frac{\pp_i^t+ \pp_j^t}{2}$. Thus,
 \begin{align*}
-     \Phi^{t} - \Phi^{(t+1)} &= \sum_{(i,j) \in M_{t+1}}  \|\pp_{i}^t -\vecone/n\|_2^2 + \|\pp_{j}^t -\vecone/n\|_2^2 -  \|\pp_{i}^{(t+1)} -\vecone/n\|_2^2 - \|\pp_{j}^{(t+1)} -\vecone/n\|_2^2\\
-     &= \sum_{(i,j)\in M_{t+1}}  \|\pp_{i}^t -\vecone/n\|_2^2 + \|\pp_{j}^t -\vecone/n\|_2^2 - 2 \left\|\frac{\pp_i^t+ \pp_j^t}{2} - \vecone/n \right\|_2^2.
+     \Phi^{t} - \Phi^{(t+1)} = \sum_{(i,j)}  \|\pp_{i}^t -\vecone/n\|_2^2 + \|\pp_{j}^t -\vecone/n\|_2^2 - 2 \left\|\frac{\pp_i^t+ \pp_j^t}{2}\right\|_2^2.
 \end{align*}
 Finally, we can use the formula $\|\xx\|^2 + \|\yy\|^2 - 2 \|(\xx + \yy)/2\|^2 = \frac{1}{2} \| \xx - \yy\|^2$ term-wise to derive 
 \begin{align*}
      \Phi^{t} - \Phi^{(t+1)} = \frac{1}{2}\sum_{(i,j) \in M_{t+1}} \|(\pp_{i}^t -\vecone/n) - (\pp_{j}^t -\vecone/n)\|_2^2 = \frac{1}{2}\sum_{(i,j) \in M_{t+1}} \|\pp_{i}^t - \pp_{j}^t \|_2^2.
 \end{align*}
-The potential thus drops by a lot if vertices $i$ and $j$ are matched where $\pp_{i}^t$ and $\pp_{j}^t$ differ starkly.
 
-\paragraph{Understanding the Random Projection.} Next, we want to further lower bound the potential drop using the random vector $\uu$. This intuitively helps a lot in our analysis since we are matching vertices $i,j$ with high value $\uu_i$ and low value $\uu_j$ (or vice versa). We will show that (w.p. $\geq 1-n^{-3}$)
+\paragraph{Understanding the Random Projection.} Next, we want to further lower bound the potential drop using the random vector $\uu$. We will show that (w.p. $\geq 1-n^2$)
 \begin{align}\label{eq:cutMatchingAnalysis}
      \Phi^{t} - \Phi^{(t+1)} = \frac{1}{2} \sum_{(i,j) \in M_{t+1}} \|\pp_{i}^t - \pp_{j}^t \|_2^2 \geq \frac{n-1}{32 \cdot \log n} \sum_{(i,j) \in M_{t+1}} \|\uu_i - \uu_j\|^2_2.
 \end{align}
@@ -211,7 +204,7 @@ To prove this claim, we will prove this again term-wise, showing that for each p
 
 To this end, let us make the following observations: since $\uu_i = \pp_i^t \cdot \rr$, we have that $\uu_i - \uu_j = (\pp_i^t - \pp_j^t) \cdot \rr$ by linearity. Also note that since $\sum_j \pp_{j \mapsto i}^t = 1$ for all $i$ (since $\proj^t$ is doubly-stochastic), we further have that the projection $(\pp_i^t - \pp_j^t)$ is orthogonal to $\vecone$.
 
-We can now use the following statement about random vector $\rr$ to argue about the effect of projecting $(\pp_i^t - \pp_j^t)$ onto $\rr$. Below, we note that we have $d = n-1$ since $\rr$ is chosen from the $(n-1)$-dimensional space orthogonal to $\vecone$.
+We can now use the following statement about random vector $\rr$ to argue about the effect of projecting $(\pp_i^t - \pp_j^t)$ onto $\rr$. 
 
 \begin{theorem}\label{thm:factsGaussianAnnulus}
 If $\yy$ is a vector of length $\ell$ in $\mathbb{R}^d$, and $\rr$ a unit random vector in $\mathbb{R}^d$, then
@@ -225,19 +218,19 @@ This allows us to pick $x = 16 \cdot \log n$, and we then we obtain that
 \[
     \mathbb{P}\left[ ((\pp_i^t - \pp_j^t) \cdot \rr)^2 \geq  \frac{16 \log n}{n-1} \|\pp_i^t - \pp_j^t\|_2^2\right] \leq e^{-4 \log n} = n^{-4}.
 \]
-Multiplying both sides of the event by $(n-1)/(32 \log n)$, we derive the claimed inequality  \ref{eq:cutMatchingAnalysis}. We can further union bound over the $n/2$ matching pairs to all satisfy this bound with probability $\geq 1-n^{-3}$, as desired.
+Multiplying both sides of the event whose probability we bound by $(n-1)/(16 \log n)$, we derive the claimed inequality  \ref{eq:cutMatchingAnalysis}.
 
-\paragraph{Relating to the Lengths of the Projections.} Let $\mu = \max_{i \in S} \uu_i$, then we have by definition that $\uu_i \leq \mu \leq \uu_j$ for all $i \in S, j \in \overline{S}$.
+\paragraph{Relating to the Lengths of the Projections.} Let $\mu = \max_{i \in S} \uu_i$, then we have by definition that $\mu \leq \uu_j$ for all $j \in \overline{S}$.
 
 Now we can write 
 \begin{align*}
      \Phi^{t} - \Phi^{(t+1)} &\geq \frac{n-1}{32 \cdot \log n} \sum_{(i,j) \in M_{t+1}} \|\uu_i - \uu_j\|^2_2 \\
      &\geq  \frac{n-1}{32 \cdot \log n} \sum_{(i,j) \in M_{t+1}}  (\uu_i - \mu)^2 + (\uu_j - \mu)^2\\
-     &=  \frac{n-1}{32 \cdot \log n}\left( \sum_{i \in V} \uu_i^2 - 2\mu \cdot \sum_i \uu_i + n \mu^2 \right)
+     &=  \frac{n-1}{32 \cdot \log n}\left( \sum_{i \in V} \uu_i^2 - \mu \cdot \sum_i \uu_i + n \mu \right)
 \end{align*}
 by standard calculations. We then observe that $\sum_i \uu_i = \sum_i \pp_i^t \cdot \rr = \vecone \cdot \rr = 0$ by the fact that $\proj^t$ is doubly-stochastic and since $\rr$ is orthogonal to the all-ones vector. We can therefore conclude 
 \[
-\frac{n-1}{32 \cdot \log n}\left( \sum_{i \in V} \uu_i^2 - 2\mu \cdot \sum_i \uu_i + n \mu^2 \right) \geq \frac{n-1}{32 \cdot \log n} \sum_{i \in V} \uu_i^2.
+\frac{n-1}{32 \cdot \log n}\left( \sum_{i \in V} \uu_i^2 - \mu \cdot \sum_i \uu_i + n \mu \right) \geq \frac{n-1}{32 \cdot \log n} \sum_{i \in V} \uu_i^2.
 \]
 It remains to use the second fact of Theorem \ref{thm:factsGaussianAnnulus} to obtain that 
 \[
@@ -255,5 +248,4 @@ It remains to conclude
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
-%%% TeX-engine: luatex
 %%% End:
