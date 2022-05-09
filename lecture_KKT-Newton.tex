@@ -1,0 +1,522 @@
+\chapter{Karush-Kuhn-Tucker Conditions, Fenchel Conjugates, Newton's Method}
+% \documentclass[draft,11pt]{article}
+%\documentclass[11pt]{article}
+%\input{../defs}
+%\input{../layout-defs}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{amsthm}
+%\usepackage{graphicx}
+%\usepackage{float}
+%\usepackage[ruled,vlined]{algorithm2e}
+%\SetKwBlock{Repeat}{repeat}{}
+
+%%% for this lecture
+%\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+%\newcommand\st{~\mathrm{s.t.}~}
+%\newcommand\ttau{\boldsymbol{\tau}}
+%\newcommand{\df}{\mathrm{d}}
+%\def\hcalE{\hat{\mathcal{E}}}
+
+%%%% ADD MACROS HERE
+% feel free to add more macros here
+
+%\begin{document}
+
+\sloppy
+%\lecture{13 --- Wednesday, May 20th}{Spring 2020}{Rasmus Kyng, Scribe:
+%  Hongjie Chen}{
+%Karush-Kuhn-Tucker Conditions, Fenchel Conjugates, Newton's Method
+%}
+\section{Lagrange Multipliers and Convex Duality Recap}
+Recall the convex optimization program we studied last chapter,
+\begin{align*}
+  \min\quad & \calE(\yy) \\
+  \text{s.t.}\quad  & \AA\yy = \bb \numberthis \label{eq:primal} \\
+              & \cc(\yy) \leq \veczero,
+\end{align*}
+where $\calE(\yy): S \rightarrow \R$ is defined on a subset $S \subseteq \R^n$, $\AA \in \R^{m\times n}$
+and $\cc(\yy)$ is a vector of constraints $\cc(\yy) = \left(c_i(\yy)\right)_{i \in [k]}$.
+For every $i \in [k]$ the function $c_i: S \rightarrow \R$ is convex. We call (\ref{eq:primal}) the primal (program) and denote its optimal value by $\alpha^*$.
+
+The associated Lagrangian is defined by
+\[
+  L(\yy, \xx, \ss) = \calE(\yy) + \xx^T(\bb-\AA\yy) + \ss^T\cc(\yy).
+\]
+where $\xx \in \R^m$, $\ss \in \R^k$ are dual variables. The dual (program) is given by
+\begin{equation}
+  \label{eq:dual}
+  \max_{\substack{\xx, \ss \\ \ss \geq 0}} \quad L(\xx,  \ss)
+\end{equation}
+whose optimal value is denoted by $\beta^*$. The dual is always a convex optimization program even though the primal is non-convex.
+The optimal value of the primal (\ref{eq:primal}) can also be written as
+\begin{equation}\label{eq:alpah}
+  \alpha^* = \inf_{\yy} \sup_{\xx; \ss\geq\veczero} L(\yy, \xx, \ss),
+\end{equation}
+where no constraint is imposed on the primal variable $\yy$.
+The optimal value of the dual (\ref{eq:dual}) is
+\begin{equation}\label{eq:beta}
+  \beta^* = \sup_{\xx; \ss\geq\veczero} \inf_{\yy} L(\yy, \xx, \ss).
+\end{equation}
+Note the only difference between (\ref{eq:alpah}) and (\ref{eq:beta}) is that the positions of ``inf" and ``sup" are swapped.
+The weak duality theorem states that the dual optimal value is a lower bound of the primal optimal value, i.e.\ $\beta^* \leq \alpha^*$.
+
+The Slater's condition for (\ref{eq:primal}) open domain $S$ requires the existence of a \emph{strictly feasible} point, i.e.\ there exists $\yytil\in S$ s.t.\ $\AA\yytil = \bb$ and $\cc(\yytil) < \veczero$.
+This means that the strictly feasible point $\yytil$ lies inside the
+interior of the set $\{\yy : \cc(\yy) \leq \veczero\}$ defined by the
+inequality constraints.
+If the domain $S$ is not open, Slater's condition also requires that a
+the strictly feasible point is in the relative interior of $S$ (NB:
+when $S$ is open, $S$ is equal to its relative interior).
+The strong duality theorem says that Slater's condition implies strong
+duality, $\beta^* = \alpha^*$.
+
+We were also introduced to the KKT conditions, and we saw that for our
+convex programs with continuously differentiable objective and
+constraints functions, when the domain is open, the conditions are sufficient to
+imply strong duality and primal-dual optimality of the points that
+satisfy them.
+If Slater's condition holds, we also have that KKT necessarily holds
+at any optimal solution.
+
+\begin{example}
+  In Chapter~\ref{cha:maxflow2}, we gave a combinatorial proof of the min-cut max-flow
+  theorem, and showed that the min-cut program can be expressed as a
+  linear program. Now, we will use the strong duality theorem to give
+  an alternative proof, and directly find the min-cut linear program
+  is the dual program to our maximum flow linear program.
+
+  We will assume that Slater's condition holds for our primal
+  program.
+  Since scaling the flow down enough will always ensure that
+  capacity constraints are strictly satisfied i.e.\ $\ff < \cc$, the
+  only concern is to make sure that non-negativity constraints are satisfied.
+  This means that there is an $s$-$t$ flow that sends a non-zero flow
+  on every edge.
+  In fact, this may not always be possible, but it is
+  easy to detect such edges and remove them without changing the value
+  of the program: an edge $(u,v)$ should be removed if there is no
+  path $s$ to $u$ or no path $v$ to $t$. We can identify all such
+  edges using a BFS from $s$ along
+  the directed edges and a BFS along reversed directed edges from $t$.
+
+  Slater's condition holds whenever there is a directed path from $s$ to $t$
+  with non-zero capacity (and if there is not, the maximum flow and
+  minimum cut are both zero).
+  \begin{align*}
+    \min_{\begin{subarray}{c} F\in\R \\ \BB\ff=F\bb_{s,t} \\ \veczero\leq\ff\leq\cc \end{subarray}} -F
+    &= \min_{F;\ff\geq\veczero} \max_{\xx;\ss\geq\veczero} -F + \xx^\trp(F\bb_{s,t}-\BB\ff) + (\ff-\cc)^\trp\ss \\
+    & \text{(Slater's condition $\implies$ strong duality)} \\
+    -\max_{\begin{subarray}{c} F\in\R \\ \BB\ff=F\bb_{s,t} \\ \veczero\leq\ff\leq\cc \end{subarray}} F
+    &= \max_{\xx;\ss\geq\veczero} \min_{F;\ff\geq\veczero} F(\bb_{s,t}^\trp\xx-1) + \ff^\trp(\ss-\BB^\trp\xx) -\cc^\trp\ss \\
+    &= \max_{\begin{array}{c} \xx;\ss\geq\veczero \\ \bb_{s,t}^\trp\xx=1 \\ \ss\geq\BB^\trp\xx
+             \end{array}} -\cc^\trp\ss
+  \end{align*}
+  Thus switching signs gives us
+    \begin{align*}
+    \max_{\begin{subarray}{c} F\in\R \\ \BB\ff=F\bb_{s,t} \\ \veczero\leq\ff\leq\cc \end{subarray}} F
+    &= \min_{\begin{array}{c} \xx;\ss\geq\veczero \\ \bb_{s,t}^\trp\xx=1 \\ \ss\geq\BB^\trp\xx
+    \end{array}} \cc^\trp\ss \numberthis \label{eq:min-cut-max-flow}
+  \end{align*}
+  The LHS of (\ref{eq:min-cut-max-flow}) is exactly the LP formulation
+  of max-flow, while the RHS is exactly the LP formulation of min-cut.
+  Note that we treated the ``constraint'' $ \veczero\leq\ff$ as a
+  restriction on the domain of $\ff$ rather than a constraint with a
+  dual variable associated with it.
+  We always have this kind of flexibility when deciding how to compute
+  a dual, and some choices may lead to a simpler dual program than others.
+\end{example}
+
+\section{Fenchel Conjugates}
+In this section we will learn about Fenchel conjugates. This is a
+notion of dual function that is closely related to duality of convex
+programs, and we will learn more about how dual programs behave by
+studying these functions.
+
+\begin{definition}[Fenchel conjugate]
+  Given a (convex) function $\calE:S\subseteq\R^n\to\R$, its \emph{Fenchel conjugate} is a function $\calE^*:\R^n\to\R$ defined as
+  \[ \calE^*(\zz) = \sup_{\yy\in S} \langle \zz,\yy \rangle - \calE(\yy). \]
+\end{definition}
+
+\begin{remark}
+  $\calE^*$ is a convex function whether $\calE$ is convex or not, since $\calE^*(z)$ is pointwise supremum of a family of convex (here, affine) functions of $z$.
+\end{remark}
+
+In this course, we have only considered convex functions that are
+real-valued and continuous and defined on a convex domain. For any such $\calE$, we have $\calE^{**} = \calE$,
+i.e.\ the Fenchel conjugate of the Fenchel conjugate is the original
+function.
+This is a consequence of the Fenchel-Moreau
+theorem, which establishes this under slightly more general conditions.
+We will not prove this generally, but as part of
+Theorem~\ref{thm:conjugate} below, we sketch a proof under more restrictive assumptions.
+
+\begin{example}
+  Let $\calE(\yy) = \frac{1}{p}\|\yy\|_p^p ~(p>1)$. We want to evaluate its Fenchel conjugate $\calE^*$ at any given point $\zz\in\R^n$. Since $\calE$ is convex and differentiable, the supremum must be achieved at some $\yy$ with vanishing gradient
+  \[ \grad_{\yy}\langle \zz,\yy^* \rangle - \grad\calE(\yy^*) = \zz - \grad\calE(\yy^*) = \matzero \iff \zz = \grad\calE(\yy^*). \]
+  It's not difficult to see, for all $i$,
+  \[ \zz(i) = \sgn{\yy(i)}|\yy(i)|^{p-1}. \]
+  Then,
+  \begin{align*}
+    \calE^*(\zz)
+    &= \langle \zz,\yy \rangle - \calE(\yy) \\
+    &= \sum_{i}|\zz(i)|^{\frac{1}{p-1}+1} - \frac{1}{p}|\zz(i)|^{\frac{p}{p-1}} \\
+    & (\text{define } q \st \frac{1}{q}+\frac{1}{p} = 1) \\
+    &= \frac{1}{q} \|\zz\|_q^q.
+  \end{align*}
+\end{example}
+
+More generally, given a convex and differentiable function $\calE:S\to\R$, if there exists $\yy\in S$ s.t.\ $\zz = \grad\calE(\yy)$, then $\calE^*(\zz) = (\yy^*)^\trp\grad\calE(\yy^*)-\calE(\yy^*)$.
+The Fenchel conjugate and Lagrange duality are closely related, which
+is demonstrated in the following example.
+
+
+\begin{example}
+  Consider a convex optimization program with only linear constraints,
+  \begin{align*}
+    \min_{\yy\in\R^n}\quad & \calE(\yy) \\
+    \st\quad  & \AA\yy = \bb
+  \end{align*}
+  where $\calE:\R^n\to\R$ is a convex function and $\AA\in\R^{m\times n}$.
+  Then the corresponding dual program is
+  \begin{align*}
+    \sup_{\xx\in\R^n}\inf_{\yy\in\R^n} \calE(\yy) + \xx^\trp(\bb-\AA\yy)
+    &= \sup_{\xx\in\R^n}\bb^\trp\xx - \sup_{\yy\in\R^n} \left(\xx^\trp\AA\yy - \calE(\yy)\right) \\
+    &= \sup_{\xx\in\R^n}\bb^\trp\xx - \calE^*(\AA^\trp\xx) \\
+  \end{align*}
+\end{example}
+
+\begin{theorem}[Properties of the Fenchel conjugate]
+  \label{thm:conjugate}
+  Consider a strictly convex function ${\calE : S \to \R}$ where $S \subseteq
+  R^n$ is an open convex set. When $\calE$ is differentiable with a Hessian
+  that is positive definite everywhere and its gradient $\grad \calE$
+is surjective onto
+  $\R^n$, we have the following three properties:
+  \begin{enumerate}
+  \item $\grad\calE(\grad\calE^*(\zz))=\zz$ \text{and} $\grad\calE^*(\grad\calE(\yy)) = \yy$ \label{enu:gradmap}
+  \item $(\calE^*)^* = \calE$, i.e.\ the Fenchel conjugate of the \label{enu:doubleconj}
+      Fenchel conjugate is the original function.
+  \item $\HH_{\calE^*}(\grad\calE(\yy)) = \HH_{\calE}^{-1}(\yy)$ \label{enu:hessianmap}
+  \end{enumerate}
+\end{theorem}
+
+\begin{figure}[H]
+\begin{mdframed}
+  \centering
+%  \includegraphics[width=0.5\linewidth]{fig/Fenchel_conjugate.png}
+\begin{center}
+\begin{tabular}{ c c c }
+ primal point $\yy$
+  & $  \begin{matrix}
+    \xrightarrow{\grad_{\yy} \calE }{} \\
+     \xleftarrow{\grad_{\zz} \calE^* }{}
+   \end{matrix}$ &
+                   dual point $\zz$ \\
+  \\
+ gradient $\grad_{\yy} \calE(\yy) = \zz$  & & gradient $\grad_{\zz}
+                                              \calE^*(\zz) = \yy$ \\
+  \\
+ Hessian $\HH_{\calE}(\yy) = \HH_{\calE^*}^{-1}(\zz) $ & & Hessian $\HH_{\calE^*}(\yy) = \HH_{\calE}^{-1}(\yy)$
+\end{tabular}
+\end{center}
+  \caption{Properties of Fenchel conjugate}
+  \label{fig:fenchel}
+\end{mdframed}
+\end{figure}
+
+\begin{proof}[Proof sketch]
+  \emph{Part \ref{enu:gradmap}.}
+  Because the gradient $\grad_{\yy}\calE$ is surjective onto $\R^n$,
+  given any $\zz \in \R^n$, there exists a $\yy$ such that $\grad
+  \calE(\yy) = \zz$.  Let $\yy(\zz)$ be a $\yy$ s.t. $\grad
+  \calE(\yy) = \zz$.
+  It can be shown that because $\calE$ is strictly convex, $\yy(\zz)$
+  is unique.
+  
+  The function $\yy \mapsto \ip{\zz, \yy} - \calE(\yy) $ is concave in
+  $\yy$ and has gradient $\zz - \grad \calE(\yy)$ and is hence
+  maximized at $\yy = \yy(\zz)$. This follows because we know a
+  differentiable convex function is  minimized when its gradient is zero and so a differentiable concave function is
+  maximized when its gradient is zero.
+  
+ Then, using the product rule and composition rule of derivatives,
+  \begin{align*}
+    \grad\calE^*(\zz) &= \grad_{\zz} \left(\langle\zz,\yy(\zz)\rangle - \calE(\yy(\zz))\right) \\
+    &= \yy(\zz) + \diag(\zz)\grad_{\zz}\yy(\zz) - \diag(\underbrace{\grad_{\yy}\calE(\yy(\zz)}_{=\zz}))\grad_{\zz}\yy(\zz) \\
+    &= \yy(\zz)
+  \end{align*}
+  Thus we have $\grad_{\yy}\calE(\yy(\zz)) = \zz$ and
+  $\grad_{\zz}\calE^*(\zz)=\yy(\zz)$.
+  Combining the two, we have $\grad\calE(\grad\calE^*(\zz))=\zz$.
+
+
+We can also see that for any $\yy$, there exists a $\zz$ such that
+$\grad_{\zz}\calE^*(\zz)=\yy$, namely, this is attained by $\zz =
+\grad_{\yy}\calE(\yy)$.
+% This $\zz$ is unique, because if $\yy(\zz) = \yy(\zz')$, then
+% $\zz' = \grad_{\yy}\calE(\yy(\zz)) = \zz$.
+Thus, $\grad\calE^*(\grad\calE(\yy))=\yy$.
+% \todo{old}
+
+
+% there exists an a $\zz$ such that
+% $\grad_{\yy}\calE(\yy)$,
+
+% So, we can also conclude that
+
+%     At the same time, we also that the $\yy$ such that
+%   $\grad_{\yy}\calE(\yy(\zz)) = \zz$ is distinct .
+%   To see this, note that if $\yy(\zz) = \yy(\zz')$, then
+%   $\zz' = \grad_{\yy}\calE(\yy(\zz)) = \zz$
+
+
+%   At the same time, we also that the $\yy$ such that
+%   $\grad_{\yy}\calE(\yy(\zz)) = \zz$ is unique.
+%   To see this, note that if $\yy(\zz) = \yy(\zz')$, then
+%   $\zz' = \grad_{\yy}\calE(\yy(\zz)) = \zz$
+
+%   But, note that if $\grad_{\yy}\calE(\yy(\zz)) = \zz'$
+
+%   note that we cannot have two distinct $\zz ,\zz'$ (i.e.\ $\zz \neq \zz'$)
+%   such that $\yy(zz)$
+
+%   we can also write $\grad\calE^*(\grad\calE(\yy))=\yy$.
+
+
+
+%   Combining the two, we have $\grad\calE(\grad\calE^*(\zz))=\zz$.
+
+
+%   Plugging $\zz = \grad\calE(\yy(\zz))$, one has
+%   $\grad\calE^*(\grad\calE(\yy))=\yy$.
+%   But, for a given $\yy$, associate a $\zz(\yy) =
+%   \grad\calE(\yy)$, and then we have
+%   $\zz = \grad\calE(\yy)$
+
+
+
+%   Note also, that for a given $\yy$, we can associate a $\zz(\yy) =
+%   \grad\calE(\yy)$.
+%   At this
+
+
+%  Furthermore, one can show that $ \grad\calE : \R^n \to \R^n$ is a
+%  bijection (we omit the proof).
+%  Hence for a given $\yy$ there always exist unique $\zz$ such that
+%  $\zz = \grad\calE(\yy)$
+
+%   Thus, we can write for this pair $\yy,\zz$ that
+%   $\grad_{\yy}\calE(\yy) = \zz$ and $\grad_{\zz}\calE^*(\zz)=\yy$,
+%   and we have that $\grad\calE^*(\grad\calE(\yy))=\yy$.
+
+
+\emph{Part \ref{enu:doubleconj}.}
+  Observe that
+  \[ \calE^{**}(\uu) = \sup_{\zz \in \R^n} \ip{\uu,\zz} - \calE^*(\zz) \]
+  and let $\zz(\uu)$ denote the $\zz$ obtaining the supremum, in the
+  above program.
+  We then have ${\uu =\grad\calE^*(\zz(\uu))}$. Letting $\yy(\zz)$ be
+  defined as in Part~\ref{enu:gradmap},
+  we get $\yy(\zz(\uu)) = \grad_{\zz}\calE^*(\zz(\uu)) = \uu$
+  \[
+    \calE^{**}(\uu) = \ip{\uu,\zz(\uu)} - \left(
+      \ip{\zz(\uu),\yy(\zz(\uu))}-\calE(\yy(\zz(\uu))) \right)
+    = \calE(\uu)
+  .
+  \]
+  \emph{Part \ref{enu:hessianmap}.}
+  Now we add two infinitesimals $\ttau$ and $\ddelta$ to $\zz$ and $\yy$ respectively s.t.
+  \[ \grad_{\zz}\calE^*(\zz+\ttau)=\yy+\ddelta, \quad \grad_{\yy}\calE(\yy+\ddelta) = \zz+\ttau. \]
+  Then,
+  \[ \grad_{\yy}\calE(\yy+\ddelta) - \grad_{\yy}\calE(\yy) = \ttau, \quad
+  \grad_{\zz}\calE^*(\zz+\ttau) - \grad_{\zz}\calE^*(\zz) = \ddelta. \]
+  Since $\HH_{\calE}(\yy)$ measures the change of $\grad_{\yy}\calE(\yy)$ when $\yy$ changes by an infinitesimal $\ddelta$, then
+  \begin{align*}
+    & \grad_{\yy}\calE(\yy+\ddelta) - \grad_{\yy}\calE(\yy) \approx \HH_{\calE}(\yy)\ddelta \\
+    \iff & \HH_{\calE}^{-1}(\yy)\left( \grad_{\yy}\calE(\yy+\ddelta) - \grad_{\yy}\calE(\yy) \right) \approx \ddelta \\
+    \iff & \HH_{\calE}^{-1}(\yy)\ttau \approx \ddelta = \grad\calE^*(\zz+\ttau) - \grad\calE^*(\zz) \\
+    \iff & \HH_{\calE}^{-1}(\yy)\ttau \approx \grad\calE^*(\zz+\ttau) - \grad\calE^*(\zz) \numberthis \label{eq:whatever1}
+  \end{align*}
+  Similarly,
+  \begin{equation}\label{eq:whatever2}
+    \HH_{\calE^*}(\zz)\ttau \approx
+    \grad_{\zz}\calE^*(\zz+\ttau) - \grad_{\zz}\calE^*(\zz)
+  \end{equation}
+  Comparing (\ref{eq:whatever1}) and (\ref{eq:whatever2}), it is easy to see
+  \[ \HH_{\calE^*}(\zz) = \HH_{\calE}^{-1}(\yy) \iff \HH_{\calE^*}(\grad\calE(\yy)) = \HH_{\calE}^{-1}(\yy). \]
+\end{proof}
+
+\begin{remark}
+  Theorem~\ref{thm:conjugate} can be generalized to show that the
+  Fenchel conjugate has similar nice properties under much more
+  general conditions,
+  e.g. see \cite{BV04}.
+\end{remark}
+
+\section{Newton's Method}
+\subsection{Warm-up: Quadratic Optimization}
+First, let us play with a toy example, minimizing a quadratic function
+\[ \calE(\yy) = \frac{1}{2}\yy^\trp\AA\yy + \bb^\trp\yy + \cc \]
+where $\AA\in\R^{n \times n}$ is positive definite. By setting the gradient w.r.t. $\yy$ to zero,
+\[ \grad\calE(\yy) = \AA\yy + \bb = \matzero, \]
+we obtain the global minimizer
+\[ \yy^* = -\AA^{-1}\bb. \]
+To make it more like gradient descent, let us start at some ``guess" point $\yy$ and take a step $\ddelta$ to move to the new point $\yy+\ddelta$. Then we try to minimize $\calE(\yy+\ddelta)$ by setting the gradient w.r.t. $\ddelta$ to zero,
+\begin{align*}
+  \grad_{\ddelta} \calE(\yy+\ddelta) = \AA(\yy+\ddelta)+\bb &= \matzero \\
+  \ddelta & = -\yy-\AA^{-1}\bb \\
+  \yy+\ddelta &= -\AA^{-1}\bb
+\end{align*}
+This gives us exactly global minimizer in just one step.
+However, the situation changes when the function is not quadratic anymore and thus we do not have a constant Hessian. But taking a step which tries to set the gradient to zero might still be a good idea.
+
+\subsection{$K$-stable Hessian}
+Next, consider a convex function $\calE:\R^n\to\R$ whose Hessian is ``nearly constant". Recall the Hessian $\HH_{\calE}(\yy)$ aka $\grad^2\calE(\yy)$ at a point $\yy$ is just a matrix of pairwise 2nd order partial derivatives $\frac{\partial^2\calE(\yy)}{\partial\yy_i\partial\yy_j}$. We say $\calE$ has a $k$-stable Hessian if there exists a constant matrix $\AA$ s.t.\ for all $\yy$
+\[ \HH_{\calE}(\yy) \approx_{K} \AA \iff
+\frac{1}{1+K}\AA \preceq \HH_{\calE}(\yy) \preceq (1+K)\AA. \]
+Note that we just require the existence of $\AA$ and do not assume we know $\AA$.
+Then a natural question is to ask what convergence rate can be achieved if we take a gradient step ``guided" by the Hessian, which is called a ``Newton step". Such method is also known as the 2nd order method. Note that this is very similar to preconditioning.
+
+Now, let us make our setting precise. We want to minimize a convex function $\calE$ with $k$-stable Hessian $\AA\succ\matzero$. And $\yy^*$ is a global minimizer of $\calE$. Start from some initial point $\yy_0$. The update rule is
+\[ \yy_{i+1} = \yy_{i} - \alpha \cdot \HH_{\calE}^{-1}(\yy_{i}) \grad \calE(\yy_i), \]
+where $\alpha$ is the step size and it will be decided later.
+
+\begin{theorem}
+  $\calE(\yy_k)-\calE(\yy^*) \leq \epsilon \left(\calE(\yy_0)-\calE(\yy^*)\right)$ when $k>(K+1)^6\log(1/\epsilon)$.
+\end{theorem}
+\begin{proof}
+  By Taylor's theorem, there exists $\yytil\in[\yy,\yy+\ddelta]$ s.t.\
+  \begin{align*}
+    \calE(\yy+\ddelta) &= \calE(\yy) + \grad\calE(\yy)^\trp\ddelta + \frac{1}{2}\ddelta^\trp \HH_{\calE}(\yytil)\ddelta \\
+    &\leq \underbrace{\calE(\yy) + \grad\calE(\yy)^\trp\ddelta + \frac{(K+1)^2}{2}\ddelta^\trp \HH_{\calE}(\yy)\ddelta}_{=:f(\ddelta)} \numberthis \label{eq:whatever3}
+  \end{align*}
+  where the inequality comes from the $K$-stability of the Hessian,
+  \[ \HH_{\calE}(\yytil) \preceq (1+K)\AA \preceq (1+K)^2\HH_{\calE}(\yy). \]
+  Observe that $f(\ddelta)$ is a convex quadratic function in
+  $\ddelta$. By minimizing it, or equivalently setting $\grad_{\ddelta}f(\ddelta^*) = \matzero$, we get
+  \begin{equation}
+    \label{eq:whatever4}
+    \ddelta^* = -\frac{1}{(K+1)^2}\HH_{\calE}^{-1}(\yy)\grad_{\yy}\calE(\yy)
+  \end{equation}
+  Here, the step size $\alpha$ is equal to $(K+1)^{-2}$.
+  Then, plugging (\ref{eq:whatever4}) into (\ref{eq:whatever3}),
+  \begin{align*}
+    \calE(\yy+\ddelta^*)
+    &\leq \calE(\yy) - \frac{1}{2(K+1)^2}\grad_{\yy}\calE(\yy)^\trp \HH_{\calE}^{-1}(\yy) \grad_{\yy}\calE(\yy) \\
+    &\leq \calE(\yy) - \frac{1}{2(K+1)^3}\grad_{\yy}\calE(\yy)^\trp \AA^{-1} \grad_{\yy}\calE(\yy) \\
+    & (\text{subtract } \calE(\yy^*) \text{ on both sides}) \\
+    \calE(\yy+\ddelta^*)-\calE(\yy^*) &\leq \calE(\yy)-\calE(\yy^*) - \frac{1}{2(K+1)^3}\underbrace{\grad_{\yy}\calE(\yy)^\trp \AA^{-1} \grad_{\yy}\calE(\yy)}_{=:\sigma}
+  \end{align*}
+  where the second inequality is due to $K$-stability of the inverse Hessian,
+  \[ \frac{1}{1+K}\AA^{-1} \preceq \HH_{\calE}(\yy)^{-1} \preceq (1+K)\AA^{-1}. \]
+  Meanwhile, using Taylor's theorem and $K$-stability, for some
+  $\hat{\yy}$ between $\yy$ and $\yy^*$,
+  and noting $\grad\calE(\yy^*) = \veczero$, we have
+  \begin{align*}
+    \calE(\yy) &= \calE(\yy^*) + \grad\calE(\yy^*)^\trp(\yy-\yy^*) + \frac{1}{2}(\yy-\yy^*)^\trp \HH_{\calE}(\hat{\yy})(\yy-\yy^*)  \\
+    \calE(\yy)-\calE(\yy^*) &\leq \frac{(K+1)}{2}\underbrace{(\yy-\yy^*)^\trp\AA(\yy-\yy^*)}_{=:\gamma}
+  \end{align*}
+  Next, our task is reduced to comparing $\sigma$ and $\gamma$.
+  $\yy_t := \yy^* + t(\yy-\yy^*)$ ($t\in[0,1]$) is a point on the segment connecting $\yy^*$ and $\yy$. Since
+  \[ \grad\calE(\yy) = \grad\calE(\yy) - \grad\calE(\yy^*) = \int_{0}^{1} H(\yy_t)(\yy-\yy^*)\df t, \]
+  then
+  \begin{align*}
+    (\yy-\yy^*)^\trp\grad\calE(\yy)
+    &= \int_{0}^{1} (\yy-\yy^*)^\trp H(\yy_t)(\yy-\yy^*)\df t \\
+    &\geq \frac{1}{K+1}\int_{0}^{1} (\yy-\yy^*)^\trp\AA(\yy-\yy^*)\df t \\
+    &= \frac{\gamma}{K+1} \numberthis \label{eq:idk1}
+  \end{align*}
+  On the other hand, define $\zz_s = \grad\calE(\yy^*) + s(\grad\calE(\yy)-\grad\calE(\yy^*))$ and then $\df\zz_s = \grad\calE(\yy)\df s$.
+  Using \emph{Theorem \ref{thm:conjugate}}, we have
+  \[ \yy-\yy^* = \int_{0}^{1} \HH_{\calE^*}(\zz_s) \grad\calE(\yy) \df s.\]
+  Then,
+  \begin{align*}
+    \grad\calE(\yy)^\trp(\yy-\yy^*)
+    &= \int_{0}^{1} \grad\calE(\yy)^\trp \HH_{\calE^*}(\zz_s) \grad\calE(\yy) \df s \\
+    &\leq (K+1)\int_{0}^{1} \grad\calE(\yy)^\trp \AA^{-1} \grad\calE(\yy) \df s \\
+    &\leq (K+1)\sigma \numberthis \label{eq:idk2}
+  \end{align*}
+  Combining (\ref{eq:idk1}) and (\ref{eq:idk2}) yields
+  \[ \gamma \leq (K+1)^2\sigma. \]
+  Therefore,
+  \[ \calE(\yy+\ddelta^*)-\calE(\yy^*) \leq (\calE(\yy)-\calE(\yy^*))\left(1-\frac{1}{(K+1)^6}\right). \]
+\end{proof}
+
+\begin{remark}
+  The basic idea of relating $\sigma$ and $\gamma$ in the above proof is writing the same quantity, $\grad\calE(\yy)^\trp(\yy-\yy^*)$,  as two integrations along different lines.
+  $(K+1)^6$ can be reduced to $(K+1)^2$ and even to $(K+1)$ with more care.
+  In some settings, Newton's method converges in $\log\log(1/\epsilon)$ steps.
+\end{remark}
+
+\subsection{Linearly Constrained Newton's Method}
+Let us apply Newton's method to convex optimization programs with only linear constraints,
+\begin{align*}
+  \min_{\ff\in\R^m}\quad & \calE(\ff) \\
+  \st\quad  & \BB\ff = \dd
+\end{align*}
+where $\calE:S\subseteq\R^m\to\R$ is a convex function and $\BB\in\R^{n\times m}$. Wlog, let $\dd=\matzero$, since otherwise we can equivalently deal the following program with $\BB\ff_0 = \dd$,
+\begin{align*}
+  \min_{\rrho\in\R^m}\quad & \calE(\ff_0+\rrho) \\
+  \st\quad  & \BB\rrho = \matzero
+\end{align*}
+It is useful to think of the variable $\ff\in\R^m$ as a flow in a graph.
+Define $C := \{\ff:\BB\ff=\matzero\}$ which is essentially the kernel space of $\BB$. $C$ is also called the ``cycle space" as it is the set of cycle flows when treating $\ff$ as flows.
+Restricting the domain of $\calE$ to the cycle space yields a new function $\hcalE: S \cap C \to \R$ s.t.\ $\hcalE(\ff) = \calE(\ff)$ for any $\ff\in C$.
+How does $\grad\hcalE$ look like compared to $\grad\calE$?
+Let $\Pi_C$ be the orthogonal projection matrix onto $\CC$, meaning $\Pi_C$ is symmetric and $\Pi_C\ddelta=\ddelta$ for any $\ddelta\in C$.
+Given any $\ff\in\R^m$, add to it an infinitesimal $\ddelta\in C$, then
+\begin{align*}
+  \calE(\ff+\ddelta) &\approx \calE(\ff) + \langle\grad\calE(\ff),\ddelta\rangle \\
+  &= \calE(\ff) + \langle\grad\calE(\ff),\Pi_C\ddelta\rangle \\
+  &= \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle
+\end{align*}
+This tells us the gradient of $\hcalE$ at a point $\ff\in C$ is equal to the projection of gradient of $\grad\calE$ at $\ff$ onto the subspace $C$.
+Similarly,
+\begin{align*}
+  \calE(\ff+\ddelta) &= \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle + \frac{1}{2}\langle\ddelta,\Pi_C\HH_{\calE}(\ff)\Pi_C\ddelta\rangle
+\end{align*}
+Note that if $\calE$ has $K$-stable Hessian, then $\hcalE$ also has $K$-stable Hessian.
+
+What is a Newton step $\ddelta^*$ in a linearly constrained optimization program? $\ddelta^*$ should be a minimizer of
+\begin{align*}
+  & \min_{\begin{subarray}{c} \ddelta\in\R^m \\ \BB\ddelta=\matzero \end{subarray}} \langle \underbrace{\grad\calE(\ff)}_{=:\gg},\ddelta\rangle + \frac{1}{2}\langle\ddelta,\underbrace{\HH_{\calE}(\ff)}_{=:\HH} \ddelta\rangle \\
+  & \text{(Lagrange duality)} \\
+  \iff & \max_{\xx\in\R^n} \min_{\ddelta\in\R^m} \underbrace{\langle\gg,\ddelta\rangle + \frac{1}{2}\langle\ddelta,\HH\ddelta\rangle - \xx^\trp\BB\ddelta}_{\text{Lagrangian } L(\ddelta,\xx)} \numberthis \label{eq:finally}
+\end{align*}
+Applying the KKT optimality conditions, one has
+\begin{align*}
+  \BB\ddelta = \matzero, \\
+  \grad_{\ddelta} L(\ddelta,\xx) = \gg+ \HH\ddelta - \BB^\trp\xx = \matzero,
+\end{align*}
+from which we get
+\begin{align*}
+  \ddelta + \HH^{-1}\gg &= \HH^{-1}\BB^\trp\xx \\
+  \underbrace{\BB\ddelta}_{=\matzero} + \BB\HH^{-1}\gg  &= \BB\HH^{-1}\BB^\trp\xx \\
+  \BB\HH^{-1}\gg  &= \underbrace{\BB\HH^{-1}\BB^\trp}_{=:\LL}\xx
+\end{align*}
+Finally, the solutions to (\ref{eq:finally}) are
+\[\begin{cases}
+  \xx^* &= \LL^{-1}\BB\HH^{-1}\gg \\
+  \ddelta^* &= -\HH^{-1}\gg + \HH^{-1}\BB^\trp\xx^*
+\end{cases}\]
+It is easy to verify that $\BB\ddelta^* = \matzero$. Thus, our update rule is $\ff_{i+1} = \ff_{i} + \ddelta^*$. And we have the following convergence result.
+\begin{theorem}
+  $\hcalE(\ff_k)-\hcalE(\ff^*) \leq \epsilon \cdot \big(\hcalE(\ff_0)-\hcalE(\ff^*)\big)$ when $k>(K+1)^6\log(1/\epsilon)$.
+\end{theorem}
+
+\begin{remark}
+  Note if $\calE(\ff) = \sum_{i=1}^{m} \calE_{i}(\ff(i))$, then
+  $\HH_{\calE}(\ff)$ is diagonal. Thus, $\LL=\BB\HH^{-1}\BB^\trp$ is
+  indeed a Laplacian provided that $\BB$ is an incidence matrix.
+  Therefore, the linear equations we need to solve to apply
+  Newton's method in a network flow setting are Laplacians, which
+  means we can solve them very quickly.
+\end{remark}
+
+
+%\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
