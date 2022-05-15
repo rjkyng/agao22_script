@@ -455,30 +455,74 @@ Let us apply Newton's method to convex optimization programs with only linear co
   \min_{\ff\in\R^m}\quad & \calE(\ff) \\
   \st\quad  & \BB\ff = \dd
 \end{align*}
-where $\calE:S\subseteq\R^m\to\R$ is a convex function and $\BB\in\R^{n\times m}$. Wlog, let $\dd=\matzero$, since otherwise we can equivalently deal the following program with $\BB\ff_0 = \dd$,
+where $\calE:\R^m\to\R$ is a convex function and $\BB\in\R^{n\times m}$. Wlog, let $\dd=\matzero$, since otherwise we can equivalently deal the following program with $\BB\ff_0 = \dd$,
 \begin{align*}
   \min_{\rrho\in\R^m}\quad & \calE(\ff_0+\rrho) \\
   \st\quad  & \BB\rrho = \matzero
 \end{align*}
 It is useful to think of the variable $\ff\in\R^m$ as a flow in a graph.
-Define $C := \{\ff:\BB\ff=\matzero\}$ which is essentially the kernel space of $\BB$. $C$ is also called the ``cycle space" as it is the set of cycle flows when treating $\ff$ as flows.
-Restricting the domain of $\calE$ to the cycle space yields a new function $\hcalE: S \cap C \to \R$ s.t.\ $\hcalE(\ff) = \calE(\ff)$ for any $\ff\in C$.
-How does $\grad\hcalE$ look like compared to $\grad\calE$?
+Define $C := \{\ff:\BB\ff=\matzero\}$ which is the kernel space of $\BB$. $C$ is also called the ``cycle space" as it is the set of cycle flows when treating $\ff$ as flows.
+
+\paragraph{Analyzing the convergence of Newton's method with linear
+  constraints.}
+It is not immediately obvious, but our analysis of Newton step's and
+their convergence on objectives with a $K$-stable Hessian carries over
+directly to linearly constrained convex optimization
+problems.
+We will only sketch a proof of this.
+Firstly, we should notice that instead of thinking of our objective function
+$\calE$ as defined on $\R^m$ and then constrained to inputs $\ff \in
+C$, we can think of a new function $\hcalE: C \to \R$ defined such
+that for $\ff \in C$ we have $\hcalE(\ff) = \calE(\ff)$.
+But, $C$ is a linear subspace and is isomorphic\footnote{You don't
+  need to know the formal definition of isomorphism on vector
+  spaces. In this context, it means equivalent up to a
+  transformation by an invertible matrix. In fact in our case, the isomorphism
+is given by an orthonormal matrix.} to $\R^{\dim{C}}$.
+This means that our previous analysis can be directly applied, if we
+can compute the gradient and Hessian of the function viewed as an
+\emph{unconstrained} function on $C$ (or equivalently
+$\R^{\dim{C}}$).
+We now have two important questions to answer:
+\begin{tight_enumerate}
+\item What does the gradient and Hessian, and hence Newton steps, of
+  $\hcalE(\ff)$ and look like? 
+\item Does the $K$-stability of the Hessian of $\calE$ carry over to
+  the function $\hcalE$?
+\end{tight_enumerate}
+The gradient and Hessian of $\hcalE$ should live in $\R^{\dim C}$ and
+$\R^{\dim C \times \dim C}$ respectively.
 Let $\Pi_C$ be the orthogonal projection matrix onto $\CC$, meaning $\Pi_C$ is symmetric and $\Pi_C\ddelta=\ddelta$ for any $\ddelta\in C$.
-Given any $\ff\in\R^m$, add to it an infinitesimal $\ddelta\in C$, then
+Given any $\ff \in C$, add to it an infinitesimal $\ddelta\in C$, then
 \begin{align*}
+  \hcalE(\ff+\ddelta)=
   \calE(\ff+\ddelta) &\approx \calE(\ff) + \langle\grad\calE(\ff),\ddelta\rangle \\
   &= \calE(\ff) + \langle\grad\calE(\ff),\Pi_C\ddelta\rangle \\
-  &= \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle
+ &= \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle
 \end{align*}
-This tells us the gradient of $\hcalE$ at a point $\ff\in C$ is equal to the projection of gradient of $\grad\calE$ at $\ff$ onto the subspace $C$.
+From this, we can deduce that the gradient of $\hcalE$ at a point
+$\ff\in C$ is essentially equal (up to a fixed linear transformation
+independent of $\ff$) to the projection of gradient of $\grad\calE$ at $\ff$ onto the subspace $C$.
 Similarly,
 \begin{align*}
-  \calE(\ff+\ddelta) &= \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle + \frac{1}{2}\langle\ddelta,\Pi_C\HH_{\calE}(\ff)\Pi_C\ddelta\rangle
+   \hcalE(\ff+\ddelta) = \calE(\ff+\ddelta) & \approx \calE(\ff) + \langle\Pi_C\grad\calE(\ff),\ddelta\rangle + \frac{1}{2}\langle\ddelta,\Pi_C\HH_{\calE}(\ff)\Pi_C\ddelta\rangle
 \end{align*}
-Note that if $\calE$ has $K$-stable Hessian, then $\hcalE$ also has $K$-stable Hessian.
+Again from this, we can deduce that the Hessian of $\hcalE$ at a point
+$\ff\in C$ is essentially equal (again up to a fixed linear transformation
+independent of $\ff$) to the
+matrix $\Pi_C\HH_{\calE}(\ff)\Pi_C$.
+Note that $\XX \preceq \YY$ implies  $\Pi_C \XX \Pi_C \preceq \Pi_C
+\YY \Pi_C$, and from this we can see that the Hessian of  $\hcalE$ is
+$K$-stable if the Hessian of $\calE$ is.
 
-What is a Newton step $\ddelta^*$ in a linearly constrained optimization program? $\ddelta^*$ should be a minimizer of
+What is a Newton step $\ddelta^*$ w.r.t. $\hcalE$? It turns out that
+for actually computing the Newton step, it is easier to think again of
+$\calE$ with a constraint that the Newton step must lie in the
+subspace $C$.
+One can show that this is equivalent to the Newton step of $\hcalE$,
+but we omit this.
+
+In the constrained view, $\ddelta^*$ should be a minimizer of
 \begin{align*}
   & \min_{\begin{subarray}{c} \ddelta\in\R^m \\ \BB\ddelta=\matzero \end{subarray}} \langle \underbrace{\grad\calE(\ff)}_{=:\gg},\ddelta\rangle + \frac{1}{2}\langle\ddelta,\underbrace{\HH_{\calE}(\ff)}_{=:\HH} \ddelta\rangle \\
   & \text{(Lagrange duality)} \\
