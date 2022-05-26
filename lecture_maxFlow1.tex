@@ -428,7 +428,7 @@ Suppose   \(\ff\), \(\ffhat\) are feasible in $G$. Then this implies that \(\ffh
 Suppose that \(\ff\) is feasible in \(G\) and \(\ffhat\) is feasible in \(G_{\ff}\). Then, \(\ff + \ffhat\) is feasible in G.
 \end{lemma}
 \begin{proof}
-\(\veczero \leq \ff \leq \cc\) and  \(\ff \leq \fftil \leq \cc - \ff \), this implies \(\veczero \leq \fftil + \ff \leq \cc\).
+\(\veczero \leq \ff \leq \cc\) and  \(- \ff \leq \fftil \leq \cc - \ff \), this implies \(\veczero \leq \fftil + \ff \leq \cc\).
 \end{proof}
 
 \begin{lemma}
@@ -528,8 +528,9 @@ Using this approach, the time to find a single path is $O(m \log(n))$ where $m$ 
 This path must carry at least a \( \frac{1}{m}\) fraction of the total
 amount of flow left in \(G_{\ff}\). For instance, if \(\hat{F}\) is
 the amount of flow left in \(G_{\ff}\), then the path must carry
-\(\frac{\hat{F}}{m}\) flow (from the path decomposition lemma, there
-are at most $m$ paths, and the one carrying the most flow must carry
+\(\frac{\hat{F}}{m}\) flow (from the path decomposition lemma, 
+we know that there exists a decomposition into at most $m$ paths, 
+and the one carrying the most flow must carry
 at least the average amount).
 
 So if the flow is integral, the algorithms completes when

@@ -257,8 +257,8 @@ would call them ``power''.
 \end{figure}
 
 Now, another interesting question would seem to be: If we want to find
-a flow routing a certain demand $\dd$, how should have flow behave in
-order to minimize the the electrical energy spent routing the flow?
+a flow routing a certain demand $\dd$, how should the flow behave in
+order to minimize the electrical energy spent routing the flow?
 The electrical energy of a flow vector $\ff$ is $\energy(\ff) \defeq \sum_e \rr(e) \ff(e)^2$.
 We can phrase this as an optimization problem:
 \begin{align*}
@@ -341,7 +341,7 @@ minimum energy $\energy(\ff^*)$.
 This turns out to be an instance of a much broader phenomenon, known
 as Lagrangian duality, which allows us to learn a lot about many
 optimization problems by studying two related pairs of problems, a
-minimization problem, and a related maximizatio problem that gives
+minimization problem, and a related maximization problem that gives
 lower bounds on the optimal value of the minimization problem.
 
 \paragraph{Solving $\LL \xx = \dd$.}
@@ -388,7 +388,7 @@ derivatives, which is called the gradient.
 % algorithms.
 
 As we will see later in this course, understanding electrical problems
-from an optimization perspective is crucial to developing fast
+from an optimization perspective is crucial to develop fast
 algorithms for computing electrical flows and voltages, but to do very
 well, we also need to borrow some ideas from Gaussian Elimination.
 
@@ -529,8 +529,7 @@ $s$-$t$ minimum cut problem.
 
 \paragraph{Maximum flow, with directions and capacities.}
 We can make the maximum flow problem harder by introducing directed
-edges: To do so, we allow edges in both directions to exist between a
-vertex to exist, and we require that that flow on a directed edge is
+edges: To do so, we allow edges to exist in both directions between vertices, and we require that the flow on a directed edge is
 always non-negative. So now $G=(V,E)$ is a directed graph.
 We can also make the problem harder by introducing capacities.
 We define a capacity vector $\cc \in \R^E \geq \veczero$ and try to minimize $\norm{\CC^{-1} \ff}_{\infty}$, where $\CC =
@@ -542,7 +541,7 @@ Then our problem becomes
                      &  \ff \geq \veczero.
 \end{align*}
 For this capacitated, directed maximum flow problem, our best
-algorithms run in about $O( m \sqrt{n} )$ time in dense graphs and $O(
+algorithms run in about $O( m \sqrt{n} )$ time in sparse graphs and $O(
 m^{1.483} )$ in dense graphs\footnote{Provided the
   capacities are integers satisfying a condition like $\cc \leq n^{100} \vecone$.}, even if we are willing to
 accept fairly low accuracy solution.
@@ -553,7 +552,7 @@ combinatorial algorithms using convex optimization.
 
 \paragraph{Multi-commodity flow.}
 We can make the even harder still, by simultaneously trying to route
-to types of flow (imagine pipes with Coke and Pepsi).
+two types of flow (imagine pipes with Coke and Pepsi).
 Our problem now looks like
 \begin{align*}
 \min_{\ff_1, \ff_2 \in \R^E } & \norm{\CC^{-1} (\ff_1 + \ff_2)}_{\infty} \\
@@ -573,12 +572,12 @@ Google famously uses\footnote{At least they did at some point.} the
 PageRank problem to help decide how to rank their search results.
 This problem essentially boils down to computing the \emph{stable
 distribution} of a random walk on a graph.
-Suppose $G=(V,E)$ is a directed graph where each edge outgoing edge
+Suppose $G=(V,E)$ is a directed graph where each outgoing edge
 $(v,u)$, which we will define as going from $u$ to $v$, has a
 transition probability $p_{(v,u)} > 0$ s.t. $\sum_{z \leftarrow u}
 p_{(z,u)} = 1$.
 We can take a step of a random walk on the vertex set by starting at some vertex
-$u_0 = u$, and then randomly picking one of it the outgoing edges
+$u_0 = u$, and then randomly pick one of the outgoing edges
 $(v,u)$ with probability $p_{(v,u)}$  and move to
 the chosen vertex $u_1 = v$.  Repeating this procedure, to take a step from
 the next vertex $u_1$, gives us a

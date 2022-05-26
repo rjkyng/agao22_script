@@ -145,7 +145,7 @@ For any connected graph $G$, we have that the lazy random walk converges to the 
 
 \subsection{The Rate of Convergence}
 
-Let us now come to the main result that we want to prove this lecture. 
+Let us now come to the main result that we want to prove in this lecture. 
 
 \begin{theorem}
 In any unweighted (a.k.a.\ unit weight) connected graph $G$, for any $\pp_0$, at any time step $t$, we have for $\pp_t = \WWtil^t \pp_0$ that
@@ -220,7 +220,7 @@ This gives a system of (linear) equations, that can be neatly summarized by
 \[
 \vecone - \alpha \cdot \vecone_s = (\II - \WW^\trp) \hh
 \]
-where we have an extra degree of freedom in choosing $\alpha$ in formulating a constraint $1 - \alpha = \vecone_s^\trp (\II -\WW^\trp) \hh$. This extra degree of freedom stems from the fact that $n-1$ equations suffice for us to enforce that the returned vector $\xx$ to the system  from the system are indeed the hitting times (possibly shifted by the value assigned to coordinate $t$).
+where we have an extra degree of freedom in choosing $\alpha$ in formulating a constraint $1 - \alpha = \vecone_s^\trp (\II -\WW^\trp) \hh$. This extra degree of freedom stems from the fact that $n-1$ equations suffice for us to enforce that the returned vector $\xx$ from the system is indeed the hitting times (possibly shifted by the value assigned to coordinate $t$).
 
 \paragraph{Finding Hitting Times via Laplacian System Solve.} Since we assume $G$ connected, we have that multiplying with $\DD = \DD^\trp$ preserves equality. Further since $\WW = \AA \DD^{-1}$, we obtain
 \[

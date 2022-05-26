@@ -66,7 +66,7 @@ This means that the strictly feasible point $\yytil$ lies inside the
 interior of the set $\{\yy : \cc(\yy) \leq \veczero\}$ defined by the
 inequality constraints.
 If the domain $S$ is not open, Slater's condition also requires that a
-the strictly feasible point is in the relative interior of $S$ (NB:
+strictly feasible point is in the relative interior of $S$ (NB:
 when $S$ is open, $S$ is equal to its relative interior).
 The strong duality theorem says that Slater's condition implies strong
 duality, $\beta^* = \alpha^*$.
@@ -78,6 +78,7 @@ imply strong duality and primal-dual optimality of the points that
 satisfy them.
 If Slater's condition holds, we also have that KKT necessarily holds
 at any optimal solution.
+\textbf{In summary:} Slater's condition $\implies$ strong duality $\iff$ KKT  
 
 \begin{example}
   In Chapter~\ref{cha:maxflow2}, we gave a combinatorial proof of the min-cut max-flow
@@ -486,7 +487,7 @@ $\R^{\dim{C}}$).
 We now have two important questions to answer:
 \begin{tight_enumerate}
 \item What does the gradient and Hessian, and hence Newton steps, of
-  $\hcalE(\ff)$ and look like? 
+  $\hcalE(\ff)$ look like? 
 \item Does the $K$-stability of the Hessian of $\calE$ carry over to
   the function $\hcalE$?
 \end{tight_enumerate}
