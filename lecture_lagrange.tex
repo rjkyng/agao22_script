@@ -189,11 +189,11 @@ which implies the sublevel set $\setof{y : c_i(\yy) \leq 0 }$ is
 convex.
 Given a solution $\yy$, we say an inequality constraint is
 \emph{tight} at $\yy$ if $c_i(\yy) = 0$.
-In the following we will denote by $\alpha^* = \energy(\yy^*)$ the optimal value of the this program where $\yy^*$ is an minimizer.
+In the following we will denote by $\alpha^* = \energy(\yy^*)$ the optimal value of this program where $\yy^*$ is a minimizer.
 
 We will call this \emph{the primal program} -- and later we will see
 that we can associate another related convex program with any such
-convex program -- and we will call this second program \emph{the  dual program}.
+convex program -- and we will call this second program \emph{the dual program}.
 
 \begin{definition}[Primal feasibility]
 We say that $\yy \in S$ is \emph{primal feasible} if all constraints are satisfied, i.e.~$\AA\yy = \bb$ and $\cc(\yy) \leq \veczero$.
@@ -231,8 +231,8 @@ To recap, given cofficients $\xx \in \R^m$ and $\ss \in \R^k$ with
 $\ss(i) \geq 0$ if $c_i(\yy^*) = 0$, and $\ss(i) = 0$ otherwise, we
 should be able to write
 \begin{align}
-  -\grad_{\yy}\calE(\yy^*) = \sum_{j} \xx(j) \aa_j + \sum_{i}
-  \ss(i)^\trp\grad\cc(\yy^*)
+  -\grad_{\yy}\calE(\yy^*) = \sum_{j} \xx(j) \aa_j^\trp + \sum_{i}
+  \ss(i)\grad\cc_i(\yy^*)
   \label{eq:compSlackIntro}
 \end{align}
   Note that since $\yy^*$ is feasible, and hence $\cc(\yy^*) \leq 0$,
@@ -290,7 +290,7 @@ These conditions have a name: The Karush-Kuhn-Tucker Conditions.
   \item $\AA\yy = \bb$ and $\cc(\yy) \leq 0$ \hfill (primal feasibility)
   \item $\ss \geq 0$ \hfill (dual feasibility)
   \item $\grad_{\yy}\calE(\yy) + \AA^\trp\xx +
-    \ss^\trp\grad\cc(\yy) = \matzero$ \hfill
+    \grad\cc(\yy) \ss = \matzero$ \hfill
     (KKT gradient condition, i.e. Eq.~\eqref{eq:compSlackIntro} restated)
     % $\left(\grad_{\yy}L(\yy,\xx, \ss)=\matzero\right)$
   \item $\ss(i)\cdot\cc_i(\yy) = 0$ for all $i$ \hfill (complementary slackness)
@@ -749,7 +749,7 @@ These two sets $A,B$ are illustrated in \autoref{fig:ab}.
 
 
 \subsection{KKT Revisited}
-Let's come back our earlier discussion of parallel gradients and the
+Let's come back to our earlier discussion of parallel gradients and the
 KKT conditions.
  Consider a convex program \eqref{eq:primalprob} with an open set $S$
  as its domain.
@@ -799,7 +799,7 @@ imply Proposition~\ref{pro:KKTnecessary}.
 We've seen that when strong duality holds, the KKT conditions are
 necessary for optimality. In fact, they're also sufficient for optimality, as the
 next theorem shows. And in this case, we do not need to assume
-strong duality, now is implied by the KKT conditions. 
+strong duality, as now it is implied by the KKT conditions. 
 \begin{theorem}
    Consider a convex program \eqref{eq:primalprob} with an open domain
   set $S$.
