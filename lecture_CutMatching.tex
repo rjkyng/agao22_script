@@ -90,7 +90,7 @@ Next, the algorithm creates a flow problem where each vertex $s \in S$ has to se
 \paragraph{The If Statement.} If the flow problem can be solved exactly, then we can find a path decomposition of the flow $\ff$ in $\tilde{O}(m)$ time (for example using a DFS) where each path starts in $S$ ends in $\overline{S}$ and carries one unit of flow\footnote{For simplicity, assume that the returned flow is integral.}. This defines a one-to-one correspondence between the vertices in $S$ and the vertices in $\overline{S}$. We capture this correspondences in the matching $M_i$. We will later prove the following lemma.
 
 \begin{lemma}
-If the algorithm returns after constructing $T$ matchings, for an appropriately chosen $T = \Theta(\log^2 n)$, then the graph $H$ returned by the algorithm is a $\frac{1}{2}$-expander and $G$ can be embedded into $H$ with congestion $O(\log^2 n/ \psi)$.
+If the algorithm returns after constructing $T$ matchings, for an appropriately chosen $T = \Theta(\log^2 n)$, then the graph $H$ returned by the algorithm is a $\frac{1}{2}$-expander and $H$ can be embedded into $G$ with congestion $O(\log^2 n/ \psi)$.
 \end{lemma}
 
 \paragraph{The Else Statement.} On the other hand, if the flow problem on $G$ could not be solved, then we return the min-cut of the flow problem. Such a cut can be found in $O(m)$ time by using the above reduction to an $s$-$t$ flow problem on which one can compute maximum flow $\ff$ from which the $s$-$t$ min-cut can be constructed by following the construction in the proof of \Cref{thm:maxFlowEqualsMinCut}.
