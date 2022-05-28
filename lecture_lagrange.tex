@@ -231,8 +231,8 @@ To recap, given cofficients $\xx \in \R^m$ and $\ss \in \R^k$ with
 $\ss(i) \geq 0$ if $c_i(\yy^*) = 0$, and $\ss(i) = 0$ otherwise, we
 should be able to write
 \begin{align}
-  -\grad_{\yy}\calE(\yy^*) = \sum_{j} \xx(j) \aa_j^\trp + \sum_{i}
-  \ss(i)\grad\cc_i(\yy^*)
+  -\grad_{\yy}\calE(\yy^*) = \sum_{j} \xx(j) \aa_j + \sum_{i}
+  \ss(i)\grad c_i(\yy^*)
   \label{eq:compSlackIntro}
 \end{align}
   Note that since $\yy^*$ is feasible, and hence $\cc(\yy^*) \leq 0$,
@@ -281,6 +281,9 @@ situations\footnote{
 Nonetheless, under some mild conditions, it is indeed true that the 
 conditions we argued for above must hold at any optimal solution.
 These conditions have a name: The Karush-Kuhn-Tucker Conditions.
+For convenience, we will state the conditions using $\grad \cc(\yy)$
+to denote the matrix whose $i$th column is given by $\grad c_i(\yy)$.
+This is sometimes called the Jacobian of $\cc$.
 
 \begin{definition}[The Karush-Kuhn-Tucker (KKT) Conditions]
   Given a convex optimization problem of form
