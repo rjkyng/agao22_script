@@ -40,7 +40,7 @@ $t \neq s$:
 
 \begin{align}
   \begin{aligned}
-    \max_{F>0} \;F\qquad\text{s.t.}\quad&\BB\ff = F\bb_{s,t} \\
+    \max_{F>0, \ff} \;F\qquad\text{s.t.}\quad&\BB\ff = F\bb_{s,t} \\
     &\veczero\leq \ff\leq \cc
   \end{aligned}
 \end{align}
@@ -71,7 +71,7 @@ defined above to isolate a subgraph of $G_{\ff}$ containing all information we n
 
 The last condition makes a blocking flow `blocking': it blocks any shortest augmenting path in $G_{\ff}$ by
 saturating one of its edges. Note however that a blocking flow is not necessarily a maximum flow in the
-level graph:
+level graph.
 
 \begin{figure}
   \centering

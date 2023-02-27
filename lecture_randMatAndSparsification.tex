@@ -98,7 +98,7 @@ because it requires few assumptions.
     &\geq Pr[X \geq t] \cdot t
       .
 \end{align*}
-  We can rearrange this to get the desired statment.
+  We can rearrange this to get the desired statement.
 \end{proof}
 Now, we are ready to prove Bernstein's bound.
 \begin{proof}[Proof of Theorem~\ref{thm:bernstein}]
@@ -111,13 +111,13 @@ Now, we are ready to prove Bernstein's bound.
     &=
       \Pr [ \exp(\theta X) \geq \exp(\theta t) ]
       \tag*{for any $\theta >0$,
-      because $x \to \exp(\theta x)$ is strictly increasing.}
+      because $x \mapsto \exp(\theta x)$ is strictly increasing.}
     \\
     &\leq \exp(-\theta t) \E{\exp(\theta X)}
       \tag*{by Lemma~\ref{lem:markov} (Markov's Inequality).}
   \end{align*}
   Now, let's require that $\theta \leq 1/R$
-  This will allow us to using the following bound: For all $\abs{z}
+  This will allow us to use the following bound: For all $\abs{z}
   \leq 1$,
   \begin{equation}
      \label{eq:expub}
@@ -314,8 +314,8 @@ We say that a function $f : \calS \to \R$, where $\calS \subseteq \symsetn$,
   function $\XX \mapsto \trace{f(\XX)}$ is monotone increasing.
 \end{lemma}
 \begin{proof}
-  From previous chapters, we know if $\AA\preceq\BB$ then $\lambda_i(\AA)\leq\lambda_i(B)$ for all $i$.
-  As $x \mapsto f(x)$ is monotone, then $\lambda_i(f(\AA))\leq\lambda_i(f(B))$ for all $i$.
+  From previous chapters, we know if $\AA\preceq\BB$ then $\lambda_i(\AA)\leq\lambda_i(\BB)$ for all $i$.
+  As $x \mapsto f(x)$ is monotone, then $\lambda_i(f(\AA))\leq\lambda_i(f(\BB))$ for all $i$.
   By Claim \ref{clm:tr_eq_sum_eigen}, $\trace{f(\AA)}\leq\trace{f(\BB)}$.
 \end{proof}
 From this, and the fact that $x \mapsto \exp(x)$ is a monotone function on the
@@ -801,7 +801,7 @@ We can also show that
   .
 \end{equation}
 In the exercises for this chapter, we will ask you to show that
-Equations~\eqref{eq:bernsteinelementnormbound} and~\eqref{eq:bernsteinvarnormbound} holds.
+Equations~\eqref{eq:bernsteinelementnormbound} and~\eqref{eq:bernsteinvarnormbound} hold.
 
 This means that we can apply Theorem~\ref{thm:matbernstein} to our
 $\XX = \sum_e \XX_e$, with $R =  \frac{1}{\alpha}$ and $\sigma^2 =
@@ -872,7 +872,7 @@ probability at least $1-\delta$.
   \leq
   \ww(e)\norm{ \LL^{\pinv/2}\bb_e}_2^2.
   \]
-  Recall that in Chapter~\ref{cha:pinver}, we saw that the effective between vertex
+  Recall that in Chapter~\ref{cha:pinver}, we saw that the effective resistance between vertex
   $v$ and vertex $u$ is given by
   $\norm{ \LL^{\pinv/2}(\ee_u - \ee_v)}_2^2$, and for an edge $e$
   connecting vertex $u$ and $v$, we have $\bb_{e}= \ee_u - \ee_v$.

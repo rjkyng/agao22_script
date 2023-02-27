@@ -83,9 +83,9 @@ Note that we now represent each rooted path with a tree, and this tree as its ow
 
 In our earlier discussion of binary trees, we always assumed each item has a key: Instead we will now let the key of each vertex correspond to its distance to the path-root in the path that contains it.
 We will make sure the treap respects the search property w.r.t. this set of keys/ordering, but we will not actually explicitly compute these keys or store them.
-Note one important difference to the scenario of treaps-with-keys: When we have two paths, with path-roots $r_1$ and $r_2$, we will allow ourselves to join these paths in two different ways: either so that $r_1$ becomes the overall path-root.
+Note one important difference to the scenario of treaps-with-keys: When we have two paths, with path-roots $r_1$ and $r_2$, we will allow ourselves to join these paths in two different ways: either so that $r_1$ or $r_2$ becomes the overall path-root.
 
-Let us describe how to represent a path $P$ in $G$. First, we pick for each vertex $v$, we assign it a \emph{priority} denoted $\prio(v)$, which we choose to be a uniformly random integer sampled from a large universe, say $[1, n^{100})$. We assume henceforth that $\prio(v) \neq \prio(w)$ for all $v,w\in V$.
+Let us describe how to represent a path $P$ in $G$. First, we pick for each vertex $v$, we assign it a \emph{priority} denoted $\prio(v)$, which we choose to be a uniformly random integer sampled from a large universe, say $[1, n^{100})$. We assume henceforth that $\prio(v) \neq \prio(w)$ for all $v \neq w \in V$.
 
 Then, for each path $P$ in $G$, we store the vertices in $P$ in a binary tree, in particular a treap, $\mathcal{T}_{P}$ and enforce the following invariants:
 \begin{itemize}
@@ -111,7 +111,7 @@ It is straight-forward to see that the operation $\textsc{PFindRoot}(v)$ can thu
 \paragraph{Extra fields to help with $\textsc{PAddCost}(v, \Delta)$ and $\textsc{PFindMin}(v)$.} The key trick to do the Link-Cut tree operations efficiently is to store the change to subtrees instead of updating $cost(v)$ for each affected vertex. 
 
 To this end, we store two fields $\Delta cost(v)$ and $\Delta min(v)$ for every vertex $v$. We let $cost(v)$ be the cost of each vertex, and $mincost(v)$ denote the minimum cost of any descendant of $v$ in $\mathcal{T}_{P}$ (where we let $v$ be a descendant of itself). 
-A warning: the $mincost(v)$ value \emph{not} the minimum cost on the path between $v$ and the path-root, it is the minimum cost in the treap-subtree, could be different.
+A warning: the $mincost(v)$ value is the minimum cost in the treap-subtree; \emph{not} the minimum cost on the path between $v$ and the path-root that could be different.
 Note also that we do not explicitly maintain these fields.
 
 Then, we maintain for each $v$

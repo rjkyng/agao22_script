@@ -352,7 +352,7 @@ solve linear equations in $\MM$ in time $O(\nnz(\matlow))$.
 
 \paragraph{Dealing with pseudoinverses.} But how can we solve a linear equation in $\LL = \matlow
 \matlow^\trp$, where $\LL$ is not invertible? For graph
-Laplacians we have a simple characterization the kernel, and because
+Laplacians we have a simple characterization of the kernel, and because
 of this, dealing with the lack of invertibility turns out
 to be fairly easy.
 
@@ -370,7 +370,7 @@ next week.
 The factorizations $\LL = \matlow \matlow^\trp$ that we produce will
 have the property that all diagonal entries of $\matlow$ are strictly
 non-zero, except that $\matlow(n,n) = 0$.
-From let us $\matlowhat$ as the matrix whose entries
+Let $\matlowhat$ be the matrix whose entries
 agree with $\matlow$, except that $\matlowhat(n,n) = 1$.
 Let $\calDD$ be the diagonal matrix with $\calDD(i,i) = 1$ for $i < n$
 and $\calDD(n,n) = 0$.
@@ -427,7 +427,7 @@ $i,j \in U$.
   And $\LL^{(i)}(U, U)$ is a graph Laplacian of a connected graph on
   the vertex set $U$.
 \end{claim}
-From this claim, it follows that $\LL^{(i-1)}(i,i) \neq 0$ for $i<n-1$,
+From this claim, it follows that $\LL^{(i-1)}(i,i) \neq 0$ for $i<n$,
 since a connected graph Laplacian on a graph with $\abs{U} > 1$
 vertices cannot have a zero on the diagonal, and it follows that
 $\LL^{(n-1)}(i,i) = 0$, because the only graph we allow on one vertex
